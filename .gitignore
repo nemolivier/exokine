@@ -43,3 +43,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Added by Gemini
+backend/backend.log
+backend/dev.db
+backend/dist/
+backend/npm-debug.log
+backend/yarn-debug.log
+backend/yarn-error.log
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
+android/.gradle/
+android/local.properties
+android/build/
+android/app/build/
+android/app/.cxx/
+android/app/.externalNativeBuild/
+android/app/generated/
+android/app/src/main/assets/flutter_assets/
+android/gradlew.bat
