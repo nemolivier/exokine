@@ -14,3 +14,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+Maintenant, vous pouvez lancer le backend dans un terminal avec npm start dans le dossier backend,
+  et lancer l'application Flutter avec flutter run. L'application devrait afficher "Backend status:
+  ok".

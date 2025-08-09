@@ -45,6 +45,54 @@ Ce document décrit l'architecture et la stack technologique proposées pour le 
 - **Mots de passe :** Hachage sécurisé avec `bcrypt`.
 - **Communication :** HTTPS/TLS obligatoire entre le client et le serveur.
 
+## 5. MCP
+
+- **Usage**
+autant que possible, utiliser les informations spécifiques aux langages utilisés fournis par le serveur ncp disponible : Context7
+
+
+## 6. Projet
+
+### **Général : ** Application destinée à la prescription d’exercices de kiné
+
+### **Usage : ** Simple et rapide, interface claire, Material Design le plus récent
+
+### **Structure :** Fondé sur 2 bases de donées : une contenant des exercices, une autre contenant des programmes
+
+    - **Exercices :** Un exercice contient :
+        - nom
+        - articulations impliquées
+        - muscles impliqués
+    - **Programme :** Un programme est un ensemble d’exercices il contient :
+        - nom
+        - mots clef 
+
+### **Inerface principale**
+
+La page principale est un tableau comportant un exerice par ligne
+Il est possible :
+- d’effacer une ligne
+- d’ajouter une ligne
+
+Les colonnes du tableau sont :
+- jour de la semaine où l’exercice doit être fait (liste déroulante des jours de la semaine)
+- nom de l’exercice
+- nombre de répétitions
+- nombre de séries
+- temps de pause entre les séries
+- tempo de l’exercice
+- remarques
+
+Il y a un bouton "imprimer" qui imprime le tableau sur une page au format A4, en mode paysage
+
+Il y a un bouton "sauvegarder" qui sauvegarde le tableau exercice dans un programme, dans la base de donnée programme.
+
+Il y a 2 autres onglets sur la page principale :
+- un onglet "programme" qui donne accès à la liste des programmes
+- un onglet "exercice" qui donne accès à la liste des exercices
+
+
+
 ## 4. Prochaines Étapes
 
 1.  **Initialiser le projet Flutter :** `flutter create .`
