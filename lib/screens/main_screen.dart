@@ -24,7 +24,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   late TabController _tabController;
 
   List<ProtocolExercise> _currentProtocolExercises = [];
-  final Map<int, Map<String, TextEditingController>> _controllers = {};
   final TextEditingController _remarksController = TextEditingController();
 
   final List<String> _dayAbbreviations = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
@@ -48,7 +47,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   void _addEmptyExercise() {
     final newExercise = _createEmptyExercise();
     _currentProtocolExercises.add(newExercise);
-    _initControllers(newExercise);
   }
 
   ProtocolExercise _createEmptyExercise() {
@@ -65,23 +63,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     );
   }
 
-  void _initControllers(ProtocolExercise exercise) {
-    _controllers[exercise.id] = {
-      'repetitions': TextEditingController(text: exercise.repetitions.toString()),
-      'series': TextEditingController(text: exercise.series.toString()),
-      'pause': TextEditingController(text: exercise.pause.toString()),
-      'tempo': TextEditingController(text: exercise.tempo),
-      'notes': TextEditingController(text: exercise.notes ?? ''),
-    };
-  }
-
   @override
   void dispose() {
     _tabController.dispose();
     _remarksController.dispose();
-    _controllers.values.forEach((map) {
-      map.values.forEach((controller) => controller.dispose());
-    });
     super.dispose();
   }
 
@@ -166,13 +151,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   DataColumn(label: Text('Actions')),
                 ],
                 rows: _currentProtocolExercises.map((protocolExercise) {
-                  if (_controllers[protocolExercise.id] == null) {
-                    _initControllers(protocolExercise);
-                  }
                   return DataRow(
                     cells: [
                       DataCell(
                         MultiSelectDropdown(
+                          key: UniqueKey(), // Ensure widget rebuilds
                           items: _dayAbbreviations,
                           selectedItems: protocolExercise.days,
                           onSelectionChanged: (selectedDays) {
@@ -189,6 +172,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                             if (!snapshot.hasData) return const Text('...');
                             final exercises = snapshot.data!;
                             return Autocomplete<Exercise>(
+                              key: UniqueKey(), // Ensure widget rebuilds
                               displayStringForOption: (option) => option.name,
                               initialValue: TextEditingValue(text: protocolExercise.exerciseName),
                               optionsBuilder: (TextEditingValue textEditingValue) {
@@ -237,7 +221,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       ),
                       DataCell(
                         TextFormField(
-                          controller: _controllers[protocolExercise.id]!['repetitions'],
+                          key: UniqueKey(), // Ensure widget rebuilds
+                          initialValue: protocolExercise.repetitions.toString(),
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             protocolExercise.repetitions = int.tryParse(value) ?? 0;
@@ -246,7 +231,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       ),
                       DataCell(
                         TextFormField(
-                          controller: _controllers[protocolExercise.id]!['series'],
+                          key: UniqueKey(), // Ensure widget rebuilds
+                          initialValue: protocolExercise.series.toString(),
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             protocolExercise.series = int.tryParse(value) ?? 0;
@@ -255,7 +241,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       ),
                       DataCell(
                         TextFormField(
-                          controller: _controllers[protocolExercise.id]!['pause'],
+                          key: UniqueKey(), // Ensure widget rebuilds
+                          initialValue: protocolExercise.pause.toString(),
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             protocolExercise.pause = int.tryParse(value) ?? 0;
@@ -264,7 +251,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       ),
                       DataCell(
                         TextFormField(
-                          controller: _controllers[protocolExercise.id]!['tempo'],
+                          key: UniqueKey(), // Ensure widget rebuilds
+                          initialValue: protocolExercise.tempo,
                           onChanged: (value) {
                             protocolExercise.tempo = value;
                           },
@@ -272,7 +260,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       ),
                       DataCell(
                         TextFormField(
-                          controller: _controllers[protocolExercise.id]!['notes'],
+                          key: UniqueKey(), // Ensure widget rebuilds
+                          initialValue: protocolExercise.notes,
                           onChanged: (value) {
                             protocolExercise.notes = value;
                           },
@@ -330,19 +319,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               ),
               onTap: () {
                 setState(() {
-                  // Dispose and clear old controllers to prevent memory leaks
-                  _controllers.values.forEach((map) {
-                    map.values.forEach((controller) => controller.dispose());
-                  });
-                  _controllers.clear();
-
                   _currentProtocolExercises = protocol.exercises;
                   _remarksController.text = protocol.remarks ?? '';
-
-                  // Initialize controllers for the new set of exercises
-                  for (final exercise in _currentProtocolExercises) {
-                    _initControllers(exercise);
-                  }
                 });
                 _tabController.animateTo(0);
               },
@@ -572,7 +550,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   void _removeExercise(int id) {
     setState(() {
       _currentProtocolExercises.removeWhere((exercise) => exercise.id == id);
-      _controllers.remove(id)?.values.forEach((controller) => controller.dispose());
       if (_currentProtocolExercises.isEmpty) {
         _remarksController.clear();
       }
