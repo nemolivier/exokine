@@ -23,7 +23,7 @@ router.get('/protocols', async (req, res) => {
 
 router.post('/protocols', async (req, res) => {
   const { name, exercises } = req.body;
-  const protocol = await prisma.protocol.create({
+  const createdProtocol = await prisma.protocol.create({
     data: {
       name,
       exercises: {
@@ -40,7 +40,30 @@ router.post('/protocols', async (req, res) => {
     },
     include: { exercises: true },
   });
-  res.status(201).json(protocol);
+
+  // Transform the exercises in the response to have days as an array
+  const responseProtocol = {
+    ...createdProtocol,
+    exercises: createdProtocol.exercises.map(ex => ({
+      ...ex,
+      days: ex.days.split(',').filter(d => d),
+    })),
+  };
+
+  res.status(201).json(responseProtocol);
+});
+
+router.delete('/protocols/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.protocol.delete({
+      where: { id: parseInt(id) },
+    });
+    res.status(204).send();
+  } catch (error) {
+    // Handle potential errors, e.g., protocol not found
+    res.status(404).json({ error: "Protocol not found." });
+  }
 });
 
 // Routes pour les Exercices dans un Protocole

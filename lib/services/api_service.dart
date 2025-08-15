@@ -40,6 +40,13 @@ class ApiService {
     }
   }
 
+  Future<void> deleteProtocol(int id) async {
+    final response = await http.delete(Uri.parse('$_baseUrl/protocols/$id'));
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete protocol');
+    }
+  }
+
   Future<void> deleteProtocolExercise(int id) async {
     final response = await http.delete(Uri.parse('$_baseUrl/protocol-exercises/$id'));
     if (response.statusCode != 204) {

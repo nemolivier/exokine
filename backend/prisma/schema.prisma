@@ -28,7 +28,7 @@ model Exercise {
 
 model ProtocolExercise {
   id          Int      @id @default(autoincrement())
-  protocol    Protocol @relation(fields: [protocolId], references: [id])
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
   protocolId  Int
   exercise    Exercise @relation(fields: [exerciseId], references: [id])
   exerciseId  Int

@@ -304,15 +304,69 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             final protocol = protocols[index];
             return ListTile(
               title: Text(protocol.name),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _showDeleteConfirmDialog(protocol),
+              ),
               onTap: () {
                 setState(() {
+                  // Dispose and clear old controllers to prevent memory leaks
+                  _controllers.values.forEach((map) {
+                    map.values.forEach((controller) => controller.dispose());
+                  });
+                  _controllers.clear();
+
                   _currentProtocolExercises = protocol.exercises;
-                  _currentProtocolExercises.forEach(_initControllers);
+                  // Initialize controllers for the new set of exercises
+                  for (final exercise in _currentProtocolExercises) {
+                    _initControllers(exercise);
+                  }
                 });
                 _tabController.animateTo(0);
               },
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmDialog(Protocol protocol) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmer la suppression'),
+          content: Text('Êtes-vous sûr de vouloir supprimer le programme "${protocol.name}" ? Cette action est irréversible.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Supprimer'),
+              onPressed: () async {
+                try {
+                  await _apiService.deleteProtocol(protocol.id);
+                  setState(() {
+                    _protocolsFuture = _apiService.getProtocols();
+                  });
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Programme supprimé avec succès.')),
+                  );
+                } catch (e) {
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
+                  );
+                }
+              },
+            ),
+          ],
         );
       },
     );
