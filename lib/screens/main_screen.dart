@@ -86,7 +86,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         actions: [
           IconButton(
             icon: const Icon(Icons.print),
-            onPressed: () => _generatePdf(_currentProtocolExercises),
+            onPressed: () => _showPrintDialog(),
             tooltip: 'Imprimer',
           ),
           IconButton(
@@ -613,36 +613,88 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         });
   }
 
-  Future<void> _generatePdf(List<ProtocolExercise> exercises) async {
+  void _showPrintDialog() {
+    final nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Imprimer le programme'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(hintText: "Nom de la personne"),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                final name = nameController.text;
+                if (name.isNotEmpty) {
+                  Navigator.of(context).pop();
+                  _doGeneratePdf(name);
+                }
+              },
+              child: const Text('Imprimer'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _doGeneratePdf(String personName) async {
     final pdf = pw.Document();
+    final now = DateTime.now();
+    final formattedDate = "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
+    final displayDate = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+    final fileName = "$personName - $formattedDate.pdf";
 
     pdf.addPage(
-      pw.Page(
+      pw.MultiPage(
         pageFormat: PdfPageFormat.a4.landscape,
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+        header: (pw.Context context) {
+          return pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('Programme d\'exercices', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 20),
-              pw.Table.fromTextArray(
-                headers: ['Jour', 'Exercice', 'Répétitions', 'Séries', 'Pause (s)', 'Tempo', 'Remarques'],
-                data: exercises.map((ex) => [
-                  ex.days.join(', '),
-                  ex.exerciseName,
-                  ex.repetitions.toString(),
-                  ex.series.toString(),
-                  ex.pause.toString(),
-                  ex.tempo,
-                  ex.notes ?? '',
-                ]).toList(),
-              ),
-            ],
+              pw.Text('Programme d\'exercices pour : $personName', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Date: $displayDate', style: const pw.TextStyle(fontSize: 14)),
+            ]
+          );
+        },
+        build: (pw.Context context) => [
+          pw.SizedBox(height: 20),
+          pw.Table.fromTextArray(
+            headers: ['Jour', 'Exercice', 'Répétitions', 'Séries', 'Pause (s)', 'Tempo', 'Remarques'],
+            data: _currentProtocolExercises.map((ex) => [
+              ex.days.join(', '),
+              ex.exerciseName,
+              ex.repetitions.toString(),
+              ex.series.toString(),
+              ex.pause.toString(),
+              ex.tempo,
+              ex.notes ?? '',
+            ]).toList(),
+          ),
+        ],
+        footer: (pw.Context context) {
+          return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            child: pw.Text(
+              'Nom du fichier : $fileName',
+              style: const pw.TextStyle(color: PdfColors.grey, fontSize: 10),
+            ),
           );
         },
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: fileName,
+    );
   }
 }
