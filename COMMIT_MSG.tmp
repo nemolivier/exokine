@@ -1,0 +1,6 @@
+feat: Amélioration de la fonction d'impression et correction de la génération PDF
+
+- Affiche une boîte de dialogue pour demander le nom d'une personne avant l'impression.
+- Ajoute le nom de la personne et la date du jour dans l'en-tête du PDF.
+- Ajoute le nom de fichier suggéré dans le pied de page du PDF pour contourner les limitations de la plateforme.
+- Corrige une erreur de compilation en utilisant `MultiPage` pour la génération de PDF, qui gère correctement les en-têtes et les pieds de page dans la version du package `pdf` du projet.
