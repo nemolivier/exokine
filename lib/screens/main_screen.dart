@@ -25,6 +25,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
 
   List<ProtocolExercise> _currentProtocolExercises = [];
   final Map<int, Map<String, TextEditingController>> _controllers = {};
+  final TextEditingController _remarksController = TextEditingController();
 
   final List<String> _dayAbbreviations = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
@@ -77,6 +78,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _tabController.dispose();
+    _remarksController.dispose();
     _controllers.values.forEach((map) {
       map.values.forEach((controller) => controller.dispose());
     });
@@ -145,141 +147,159 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildPrincipalView() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Jour')),
-          DataColumn(label: Text('Exercice')),
-          DataColumn(label: Text('Répétitions')),
-          DataColumn(label: Text('Séries')),
-          DataColumn(label: Text('Pause (s)')),
-          DataColumn(label: Text('Tempo')),
-          DataColumn(label: Text('Remarques')),
-          DataColumn(label: Text('Actions')),
-        ],
-        rows: _currentProtocolExercises.map((protocolExercise) {
-          if (_controllers[protocolExercise.id] == null) {
-            _initControllers(protocolExercise);
-          }
-          return DataRow(
-            cells: [
-              DataCell(
-                MultiSelectDropdown(
-                  items: _dayAbbreviations,
-                  selectedItems: protocolExercise.days,
-                  onSelectionChanged: (selectedDays) {
-                    setState(() {
-                      protocolExercise.days = selectedDays;
-                    });
-                  },
-                ),
-              ),
-              DataCell(
-                FutureBuilder<List<Exercise>>(
-                  future: _exercisesFuture,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return const Text('...');
-                    final exercises = snapshot.data!;
-                    return Autocomplete<Exercise>(
-                      displayStringForOption: (option) => option.name,
-                      initialValue: TextEditingValue(text: protocolExercise.exerciseName),
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
-                          return const Iterable<Exercise>.empty();
-                        }
-                        return exercises.where((exercise) => exercise.name
-                            .toLowerCase()
-                            .contains(textEditingValue.text.toLowerCase()));
-                      },
-                      onSelected: (Exercise selection) {
-                        setState(() {
-                          protocolExercise.exerciseId = selection.id;
-                          protocolExercise.exerciseName = selection.name;
-                        });
-                      },
-                      fieldViewBuilder: (BuildContext context, TextEditingController fieldController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                        return TextFormField(
-                          controller: fieldController,
-                          focusNode: fieldFocusNode,
-                          decoration: const InputDecoration(
-                            hintText: 'Sélectionner...', 
-                          ),
-                          onChanged: (value) {
-                             setState(() {
-                              protocolExercise.exerciseName = value;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('Jour')),
+                  DataColumn(label: Text('Exercice')),
+                  DataColumn(label: Text('Répétitions')),
+                  DataColumn(label: Text('Séries')),
+                  DataColumn(label: Text('Pause (s)')),
+                  DataColumn(label: Text('Tempo')),
+                  DataColumn(label: Text('Remarques')),
+                  DataColumn(label: Text('Actions')),
+                ],
+                rows: _currentProtocolExercises.map((protocolExercise) {
+                  if (_controllers[protocolExercise.id] == null) {
+                    _initControllers(protocolExercise);
+                  }
+                  return DataRow(
+                    cells: [
+                      DataCell(
+                        MultiSelectDropdown(
+                          items: _dayAbbreviations,
+                          selectedItems: protocolExercise.days,
+                          onSelectionChanged: (selectedDays) {
+                            setState(() {
+                              protocolExercise.days = selectedDays;
                             });
                           },
-                          onFieldSubmitted: (value) {
-                            final options = exercises.where((exercise) => exercise.name
-                                .toLowerCase()
-                                .contains(value.toLowerCase()));
-                            if (options.isNotEmpty) {
-                              setState(() {
-                                protocolExercise.exerciseId = options.first.id;
-                                protocolExercise.exerciseName = options.first.name;
-                                fieldController.text = options.first.name;
-                              });
-                            }
+                        ),
+                      ),
+                      DataCell(
+                        FutureBuilder<List<Exercise>>(
+                          future: _exercisesFuture,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) return const Text('...');
+                            final exercises = snapshot.data!;
+                            return Autocomplete<Exercise>(
+                              displayStringForOption: (option) => option.name,
+                              initialValue: TextEditingValue(text: protocolExercise.exerciseName),
+                              optionsBuilder: (TextEditingValue textEditingValue) {
+                                if (textEditingValue.text.isEmpty) {
+                                  return const Iterable<Exercise>.empty();
+                                }
+                                return exercises.where((exercise) => exercise.name
+                                    .toLowerCase()
+                                    .contains(textEditingValue.text.toLowerCase()));
+                              },
+                              onSelected: (Exercise selection) {
+                                setState(() {
+                                  protocolExercise.exerciseId = selection.id;
+                                  protocolExercise.exerciseName = selection.name;
+                                });
+                              },
+                              fieldViewBuilder: (BuildContext context, TextEditingController fieldController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                                return TextFormField(
+                                  controller: fieldController,
+                                  focusNode: fieldFocusNode,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Sélectionner...', 
+                                  ),
+                                  onChanged: (value) {
+                                     setState(() {
+                                      protocolExercise.exerciseName = value;
+                                    });
+                                  },
+                                  onFieldSubmitted: (value) {
+                                    final options = exercises.where((exercise) => exercise.name
+                                        .toLowerCase()
+                                        .contains(value.toLowerCase()));
+                                    if (options.isNotEmpty) {
+                                      setState(() {
+                                        protocolExercise.exerciseId = options.first.id;
+                                        protocolExercise.exerciseName = options.first.name;
+                                        fieldController.text = options.first.name;
+                                      });
+                                    }
+                                  },
+                                );
+                              },
+                            );
                           },
-                        );
-                      },
-                    );
-                  },
-                ),
+                        ),
+                      ),
+                      DataCell(
+                        TextFormField(
+                          controller: _controllers[protocolExercise.id]!['repetitions'],
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            protocolExercise.repetitions = int.tryParse(value) ?? 0;
+                          },
+                        ),
+                      ),
+                      DataCell(
+                        TextFormField(
+                          controller: _controllers[protocolExercise.id]!['series'],
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            protocolExercise.series = int.tryParse(value) ?? 0;
+                          },
+                        ),
+                      ),
+                      DataCell(
+                        TextFormField(
+                          controller: _controllers[protocolExercise.id]!['pause'],
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            protocolExercise.pause = int.tryParse(value) ?? 0;
+                          },
+                        ),
+                      ),
+                      DataCell(
+                        TextFormField(
+                          controller: _controllers[protocolExercise.id]!['tempo'],
+                          onChanged: (value) {
+                            protocolExercise.tempo = value;
+                          },
+                        ),
+                      ),
+                      DataCell(
+                        TextFormField(
+                          controller: _controllers[protocolExercise.id]!['notes'],
+                          onChanged: (value) {
+                            protocolExercise.notes = value;
+                          },
+                        ),
+                      ),
+                      DataCell(
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _removeExercise(protocolExercise.id),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
               ),
-              DataCell(
-                TextFormField(
-                  controller: _controllers[protocolExercise.id]!['repetitions'],
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    protocolExercise.repetitions = int.tryParse(value) ?? 0;
-                  },
-                ),
-              ),
-              DataCell(
-                TextFormField(
-                  controller: _controllers[protocolExercise.id]!['series'],
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    protocolExercise.series = int.tryParse(value) ?? 0;
-                  },
-                ),
-              ),
-              DataCell(
-                TextFormField(
-                  controller: _controllers[protocolExercise.id]!['pause'],
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    protocolExercise.pause = int.tryParse(value) ?? 0;
-                  },
-                ),
-              ),
-              DataCell(
-                TextFormField(
-                  controller: _controllers[protocolExercise.id]!['tempo'],
-                  onChanged: (value) {
-                    protocolExercise.tempo = value;
-                  },
-                ),
-              ),
-              DataCell(
-                TextFormField(
-                  controller: _controllers[protocolExercise.id]!['notes'],
-                  onChanged: (value) {
-                    protocolExercise.notes = value;
-                  },
-                ),
-              ),
-              DataCell(
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _removeExercise(protocolExercise.id),
-                ),
-              ),
-            ],
-          );
-        }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _remarksController,
+            decoration: const InputDecoration(
+              labelText: 'Remarques globales',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+        ],
       ),
     );
   }
@@ -317,6 +337,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   _controllers.clear();
 
                   _currentProtocolExercises = protocol.exercises;
+                  _remarksController.text = protocol.remarks ?? '';
+
                   // Initialize controllers for the new set of exercises
                   for (final exercise in _currentProtocolExercises) {
                     _initControllers(exercise);
@@ -551,6 +573,9 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     setState(() {
       _currentProtocolExercises.removeWhere((exercise) => exercise.id == id);
       _controllers.remove(id)?.values.forEach((controller) => controller.dispose());
+      if (_currentProtocolExercises.isEmpty) {
+        _remarksController.clear();
+      }
     });
     if (id > 0 && !id.toString().startsWith('1')) { // Don't delete default exercises
       _apiService.deleteProtocolExercise(id).catchError((error) {
@@ -583,6 +608,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     final newProtocol = Protocol(
                       id: 0,
                       name: nameController.text,
+                      remarks: _remarksController.text,
                       exercises: _currentProtocolExercises
                           .where((ex) => ex.exerciseId != 0)
                           .toList(),

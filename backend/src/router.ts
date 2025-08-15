@@ -22,10 +22,11 @@ router.get('/protocols', async (req, res) => {
 });
 
 router.post('/protocols', async (req, res) => {
-  const { name, exercises } = req.body;
+  const { name, remarks, exercises } = req.body;
   const createdProtocol = await prisma.protocol.create({
     data: {
       name,
+      remarks, // Add remarks to the creation data
       exercises: {
         create: exercises?.map((ex: any) => ({
           repetitions: ex.repetitions,
@@ -38,7 +39,7 @@ router.post('/protocols', async (req, res) => {
         })) ?? [],
       },
     },
-    include: { exercises: true },
+    include: { exercises: { include: { exercise: true } } },
   });
 
   // Transform the exercises in the response to have days as an array
