@@ -91,10 +91,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         ),
         actions: [
           _buildViewSwitcherButton(),
-          IconButton(
-            icon: const Icon(Icons.print),
-            onPressed: () => _showPrintDialog(),
-            tooltip: 'Imprimer',
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: FilledButton.tonal(
+              onPressed: () => _showPrintDialog(),
+              child: const Text('Imprimer'),
+            ),
           ),
         ],
       ),
