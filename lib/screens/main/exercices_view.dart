@@ -44,10 +44,10 @@ class ExercicesView extends StatelessWidget {
           return GridView.builder(
             padding: const EdgeInsets.all(16.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 3,
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 16.0,
-              childAspectRatio: 3 / 2,
+              childAspectRatio: 1 / 1.2,
             ),
             itemCount: exercises.length,
             itemBuilder: (context, index) {
@@ -56,27 +56,54 @@ class ExercicesView extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () => onEditExercise(exercise),
-                  child: GridTile(
-                    footer: GridTileBar(
-                      backgroundColor: Colors.black45,
-                      title: Text(exercise.name, overflow: TextOverflow.ellipsis),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white),
-                            onPressed: () => onEditExercise(exercise),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Container(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          child: Center(
+                            child: Text(
+                              exercise.name,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.white),
-                            onPressed: () => onDeleteExercise(exercise),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Icon(Icons.fitness_center, size: 48, color: Theme.of(context).colorScheme.primary),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                exercise.name,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                FloatingActionButton.small(
+                                  heroTag: 'edit_exercise_grid_${exercise.id}',
+                                  onPressed: () => onEditExercise(exercise),
+                                  child: const Icon(Icons.edit),
+                                ),
+                                const SizedBox(width: 4),
+                                FloatingActionButton.small(
+                                  heroTag: 'delete_exercise_grid_${exercise.id}',
+                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                  onPressed: () => onDeleteExercise(exercise),
+                                  child: const Icon(Icons.delete),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );

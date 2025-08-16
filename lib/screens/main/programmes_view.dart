@@ -43,10 +43,10 @@ class ProgrammesView extends StatelessWidget {
           return GridView.builder(
             padding: const EdgeInsets.all(16.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 3,
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 16.0,
-              childAspectRatio: 3 / 2,
+              childAspectRatio: 1 / 1.2,
             ),
             itemCount: protocols.length,
             itemBuilder: (context, index) {
@@ -55,20 +55,44 @@ class ProgrammesView extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () => onSelectProtocol(protocol),
-                  child: GridTile(
-                    footer: GridTileBar(
-                      backgroundColor: Colors.black45,
-                      title: Text(protocol.name, overflow: TextOverflow.ellipsis),
-                      trailing: FloatingActionButton.small(
-                        heroTag: 'delete_protocol_grid_${protocol.id}',
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        onPressed: () => onDeleteProtocol(protocol),
-                        child: const Icon(Icons.delete),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Container(
+                          color: Theme.of(context).colorScheme.secondaryContainer,
+                          child: Center(
+                            child: Text(
+                              protocol.name,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Icon(Icons.folder, size: 48, color: Theme.of(context).colorScheme.secondary),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                protocol.name,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ),
+                            FloatingActionButton.small(
+                              heroTag: 'delete_protocol_grid_${protocol.id}',
+                              backgroundColor: Theme.of(context).colorScheme.error,
+                              onPressed: () => onDeleteProtocol(protocol),
+                              child: const Icon(Icons.delete),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
