@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/protocol.dart';
 import '../../services/api_service.dart';
+import '../../widgets/empty_state_view.dart';
 
 class ProgrammesView extends StatelessWidget {
   final Future<List<Protocol>> protocolsFuture;
@@ -29,7 +30,10 @@ class ProgrammesView extends StatelessWidget {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('Aucun programme trouvé.'));
+          return const EmptyStateView(
+            icon: Icons.folder_off_outlined,
+            message: 'Aucun programme trouvé.',
+          );
         }
         final protocols = snapshot.data!;
         return ListView.builder(

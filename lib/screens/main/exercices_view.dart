@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/exercise.dart';
 import '../../services/api_service.dart';
+import '../../widgets/empty_state_view.dart';
 
 class ExercicesView extends StatelessWidget {
   final Future<List<Exercise>> exercisesFuture;
@@ -30,7 +31,10 @@ class ExercicesView extends StatelessWidget {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('Aucun exercice trouvé.'));
+          return const EmptyStateView(
+            icon: Icons.fitness_center_outlined,
+            message: 'Aucun exercice trouvé.',
+          );
         }
         final exercises = snapshot.data!;
         return ListView.builder(
