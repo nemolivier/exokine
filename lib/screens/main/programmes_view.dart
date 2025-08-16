@@ -44,9 +44,11 @@ class ProgrammesView extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: ListTile(
                 title: Text(protocol.name, style: Theme.of(context).textTheme.titleLarge),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                trailing: FloatingActionButton.small(
+                  heroTag: 'delete_protocol_${protocol.id}',
+                  backgroundColor: Theme.of(context).colorScheme.error,
                   onPressed: () => onDeleteProtocol(protocol),
+                  child: const Icon(Icons.delete),
                 ),
                 onTap: () => onSelectProtocol(protocol),
               ),

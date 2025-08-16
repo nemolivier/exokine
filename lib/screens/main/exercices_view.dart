@@ -66,13 +66,17 @@ class ExercicesView extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
+                          FloatingActionButton.small(
+                            heroTag: 'edit_exercise_${exercise.id}',
                             onPressed: () => onEditExercise(exercise),
+                            child: const Icon(Icons.edit),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                          const SizedBox(width: 8),
+                          FloatingActionButton.small(
+                            heroTag: 'delete_exercise_${exercise.id}',
+                            backgroundColor: Theme.of(context).colorScheme.error,
                             onPressed: () => onDeleteExercise(exercise),
+                            child: const Icon(Icons.delete),
                           ),
                         ],
                       ),
