@@ -139,4 +139,16 @@ router.put('/exercises/:id', async (req, res) => {
   }
 });
 
+router.delete('/exercises/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.exercise.delete({
+      where: { id: parseInt(id) },
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(404).json({ error: "Exercise not found." });
+  }
+});
+
 export default router;

@@ -124,6 +124,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             exercisesFuture: _exercisesFuture,
             onAddExercise: _showAddExerciseDialog,
             onEditExercise: _showEditExerciseDialog,
+            onDeleteExercise: _showDeleteExerciseConfirmDialog,
           ),
         ],
       ),
@@ -213,6 +214,47 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   Navigator.of(context).pop(); // Close the dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Programme supprimé avec succès.')),
+                  );
+                } catch (e) {
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteExerciseConfirmDialog(Exercise exercise) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmer la suppression'),
+          content: Text('Êtes-vous sûr de vouloir supprimer l\'exercice "${exercise.name}" ? Cette action est irréversible.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+              child: const Text('Supprimer'),
+              onPressed: () async {
+                try {
+                  await _apiService.deleteExercise(exercise.id);
+                  setState(() {
+                    _exercisesFuture = _apiService.getExercises();
+                  });
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Exercice supprimé avec succès.')),
                   );
                 } catch (e) {
                   Navigator.of(context).pop(); // Close the dialog

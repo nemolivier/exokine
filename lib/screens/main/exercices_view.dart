@@ -8,12 +8,14 @@ class ExercicesView extends StatelessWidget {
   final Future<List<Exercise>> exercisesFuture;
   final Function() onAddExercise;
   final Function(Exercise) onEditExercise;
+  final Function(Exercise) onDeleteExercise;
 
   const ExercicesView({
     super.key,
     required this.exercisesFuture,
     required this.onAddExercise,
     required this.onEditExercise,
+    required this.onDeleteExercise,
   });
 
   @override
@@ -57,9 +59,18 @@ class ExercicesView extends StatelessWidget {
                     ),
                     Align(
                       alignment: Alignment.bottomRight,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => onEditExercise(exercise),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => onEditExercise(exercise),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                            onPressed: () => onDeleteExercise(exercise),
+                          ),
+                        ],
                       ),
                     ),
                   ],

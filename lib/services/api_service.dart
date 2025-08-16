@@ -79,4 +79,11 @@ class ApiService {
       throw Exception('Failed to update exercise');
     }
   }
+
+  Future<void> deleteExercise(int id) async {
+    final response = await http.delete(Uri.parse('$_baseUrl/exercises/$id'));
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete exercise');
+    }
+  }
 }
