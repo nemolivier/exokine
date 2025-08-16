@@ -41,7 +41,7 @@ class ProgrammesView extends StatelessWidget {
           itemBuilder: (context, index) {
             final protocol = protocols[index];
             return Card.outlined(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: ListTile(
                 title: Text(protocol.name, style: Theme.of(context).textTheme.titleLarge),
                 trailing: FloatingActionButton.small(

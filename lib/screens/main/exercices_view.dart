@@ -42,7 +42,7 @@ class ExercicesView extends StatelessWidget {
           itemBuilder: (context, index) {
             final exercise = exercises[index];
             return Card.outlined(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
