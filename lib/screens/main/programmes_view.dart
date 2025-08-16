@@ -36,13 +36,16 @@ class ProgrammesView extends StatelessWidget {
           itemCount: protocols.length,
           itemBuilder: (context, index) {
             final protocol = protocols[index];
-            return ListTile(
-              title: Text(protocol.name),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => onDeleteProtocol(protocol),
+            return Card.outlined(
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ListTile(
+                title: Text(protocol.name, style: Theme.of(context).textTheme.titleLarge),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                  onPressed: () => onDeleteProtocol(protocol),
+                ),
+                onTap: () => onSelectProtocol(protocol),
               ),
-              onTap: () => onSelectProtocol(protocol),
             );
           },
         );
