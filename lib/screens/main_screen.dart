@@ -96,11 +96,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             onPressed: () => _showPrintDialog(),
             tooltip: 'Imprimer',
           ),
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveProtocol,
-            tooltip: 'Sauvegarder',
-          ),
         ],
       ),
       body: TabBarView(
@@ -199,17 +194,31 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   Widget? _buildFloatingActionButton() {
     switch (_tabController.index) {
       case 0: // Principal
-        return FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _addEmptyExercise();
-            });
-          },
-          tooltip: 'Ajouter une ligne',
-          child: const Icon(Icons.add),
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: 'add_exercise',
+              onPressed: () {
+                setState(() {
+                  _addEmptyExercise();
+                });
+              },
+              tooltip: 'Ajouter une ligne',
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(width: 16),
+            FloatingActionButton.extended(
+              heroTag: 'save_protocol',
+              onPressed: _saveProtocol,
+              label: const Text('Sauvegarder'),
+              icon: const Icon(Icons.save),
+            ),
+          ],
         );
       case 2: // Exercices
         return FloatingActionButton(
+          heroTag: 'add_base_exercise',
           onPressed: _showAddExerciseDialog,
           tooltip: 'Ajouter un nouvel exercice de base',
           child: const Icon(Icons.add),
