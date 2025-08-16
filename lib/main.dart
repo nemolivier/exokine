@@ -13,8 +13,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Exokin',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
+        cardTheme: CardThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+        ),
       ),
       home: const MainScreen(),
     );
