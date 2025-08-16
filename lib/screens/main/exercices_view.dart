@@ -10,6 +10,7 @@ class ExercicesView extends StatelessWidget {
   final Function() onAddExercise;
   final Function(Exercise) onEditExercise;
   final Function(Exercise) onDeleteExercise;
+  final bool isGridView;
 
   const ExercicesView({
     super.key,
@@ -17,6 +18,7 @@ class ExercicesView extends StatelessWidget {
     required this.onAddExercise,
     required this.onEditExercise,
     required this.onDeleteExercise,
+    required this.isGridView,
   });
 
   @override
@@ -37,12 +39,61 @@ class ExercicesView extends StatelessWidget {
           );
         }
         final exercises = snapshot.data!;
+
+        if (isGridView) {
+          return GridView.builder(
+            padding: const EdgeInsets.all(16.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16.0,
+              mainAxisSpacing: 16.0,
+              childAspectRatio: 3 / 2,
+            ),
+            itemCount: exercises.length,
+            itemBuilder: (context, index) {
+              final exercise = exercises[index];
+              return Card.outlined(
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => onEditExercise(exercise),
+                  child: GridTile(
+                    footer: GridTileBar(
+                      backgroundColor: Colors.black45,
+                      title: Text(exercise.name, overflow: TextOverflow.ellipsis),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.white),
+                            onPressed: () => onEditExercise(exercise),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.white),
+                            onPressed: () => onDeleteExercise(exercise),
+                          ),
+                        ],
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(Icons.fitness_center, size: 48, color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        }
+
         return ListView.builder(
           itemCount: exercises.length,
           itemBuilder: (context, index) {
             final exercise = exercises[index];
             return Card.outlined(
               margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+                side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(

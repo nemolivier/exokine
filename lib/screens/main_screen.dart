@@ -29,6 +29,9 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   List<ProtocolExercise> _currentProtocolExercises = [];
   final TextEditingController _remarksController = TextEditingController();
 
+  bool _isProgrammesGridView = false;
+  bool _isExercicesGridView = false;
+
   final List<String> _dayAbbreviations = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
   @override
@@ -36,7 +39,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
-      setState(() {}); // Rebuild to update FAB
+      setState(() {}); // Rebuild to update FAB and view switcher
     });
     _protocolsFuture = _apiService.getProtocols();
     _exercisesFuture = _apiService.getExercises();
@@ -87,6 +90,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           ],
         ),
         actions: [
+          _buildViewSwitcherButton(),
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () => _showPrintDialog(),
@@ -111,6 +115,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           ),
           ProgrammesView(
             protocolsFuture: _protocolsFuture,
+            isGridView: _isProgrammesGridView,
             onSelectProtocol: (protocol) {
               setState(() {
                 _currentProtocolExercises = protocol.exercises;
@@ -122,6 +127,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           ),
           ExercicesView(
             exercisesFuture: _exercisesFuture,
+            isGridView: _isExercicesGridView,
             onAddExercise: _showAddExerciseDialog,
             onEditExercise: _showEditExerciseDialog,
             onDeleteExercise: _showDeleteExerciseConfirmDialog,
@@ -163,6 +169,31 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           break;
       }
     });
+  }
+
+  Widget _buildViewSwitcherButton() {
+    if (_tabController.index == 1) {
+      return IconButton(
+        icon: Icon(_isProgrammesGridView ? Icons.view_list : Icons.grid_view),
+        onPressed: () {
+          setState(() {
+            _isProgrammesGridView = !_isProgrammesGridView;
+          });
+        },
+        tooltip: _isProgrammesGridView ? 'Afficher la liste' : 'Afficher la grille',
+      );
+    } else if (_tabController.index == 2) {
+      return IconButton(
+        icon: Icon(_isExercicesGridView ? Icons.view_list : Icons.grid_view),
+        onPressed: () {
+          setState(() {
+            _isExercicesGridView = !_isExercicesGridView;
+          });
+        },
+        tooltip: _isExercicesGridView ? 'Afficher la liste' : 'Afficher la grille',
+      );
+    }
+    return const SizedBox.shrink(); // No button on the first tab
   }
 
   Widget? _buildFloatingActionButton() {
