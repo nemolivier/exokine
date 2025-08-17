@@ -74,9 +74,6 @@ class ProgrammesView extends StatelessWidget {
                         bottom: 4,
                         right: 4,
                         child: IconButton.filled(
-                          iconSize: 18,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
                           icon: const Icon(Icons.delete),
                           style: IconButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.error,

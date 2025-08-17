@@ -79,26 +79,17 @@ class ExercicesView extends StatelessWidget {
                         child: Row(
                           children: [
                             IconButton.filledTonal(
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
                               tooltip: 'Ajouter au programme',
                               icon: const Icon(Icons.add),
                               onPressed: () => onAddToProtocol(exercise),
                             ),
                             const SizedBox(width: 4),
                             IconButton.filledTonal(
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
                               icon: const Icon(Icons.edit),
                               onPressed: () => onEditExercise(exercise),
                             ),
                             const SizedBox(width: 4),
                             IconButton.filled(
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
                               icon: const Icon(Icons.delete),
                               style: IconButton.styleFrom(
                                 backgroundColor: Theme.of(context).colorScheme.error,
