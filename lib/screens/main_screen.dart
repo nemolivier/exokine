@@ -552,6 +552,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             controller: nameController,
             decoration: const InputDecoration(hintText: "Nom de la personne"),
             autofocus: true,
+            onSubmitted: (String name) {
+              if (name.isNotEmpty) {
+                Navigator.of(context).pop();
+                _doGeneratePdf(name);
+              }
+            },
           ),
           actions: [
             TextButton(
