@@ -26,6 +26,7 @@ class PrincipalView extends StatefulWidget {
 }
 
 class _PrincipalViewState extends State<PrincipalView> {
+  final _formKey = GlobalKey<FormState>();
   final List<String> _dayAbbreviations = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
   Widget _buildHeader(BuildContext context) {
@@ -51,154 +52,193 @@ class _PrincipalViewState extends State<PrincipalView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          _buildHeader(context),
-          Expanded(
-            child: ListView.builder(
-              itemCount: widget.currentProtocolExercises.length,
-              itemBuilder: (context, index) {
-                final protocolExercise = widget.currentProtocolExercises[index];
-                return Card.outlined(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: MultiSelectDropdown(
-                              key: ValueKey(protocolExercise.id),
-                              items: _dayAbbreviations,
-                              selectedItems: protocolExercise.days,
-                              onSelectionChanged: (selectedDays) {
-                                widget.onUpdateExerciseValue(protocolExercise, 'days', selectedDays);
-                              },
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.currentProtocolExercises.length,
+                itemBuilder: (context, index) {
+                  final protocolExercise = widget.currentProtocolExercises[index];
+                  return Card.outlined(
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: MultiSelectDropdown(
+                                key: ValueKey(protocolExercise.id),
+                                items: _dayAbbreviations,
+                                selectedItems: protocolExercise.days,
+                                onSelectionChanged: (selectedDays) {
+                                  widget.onUpdateExerciseValue(protocolExercise, 'days', selectedDays);
+                                },
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 4,
-                            child: FutureBuilder<List<Exercise>>(
-                              future: widget.exercisesFuture,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) return const Center(child: Text('...'));
-                                final exercises = snapshot.data!;
-                                return Autocomplete<Exercise>(
-                                  key: ValueKey('autocomplete_${protocolExercise.id}'),
-                                  displayStringForOption: (option) => option.name,
-                                  initialValue: TextEditingValue(text: protocolExercise.exerciseName),
-                                  optionsBuilder: (TextEditingValue textEditingValue) {
-                                    if (textEditingValue.text.isEmpty) {
-                                      return const Iterable<Exercise>.empty();
-                                    }
-                                    return exercises.where((exercise) => exercise.name
-                                        .toLowerCase()
-                                        .contains(textEditingValue.text.toLowerCase()));
-                                  },
-                                  onSelected: (Exercise selection) {
-                                    widget.onUpdateExerciseValue(protocolExercise, 'exercise', selection);
-                                  },
-                                  fieldViewBuilder: (context, fieldController, fieldFocusNode, onFieldSubmitted) {
-                                    return TextFormField(
-                                      controller: fieldController,
-                                      focusNode: fieldFocusNode,
-                                      decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
-                                      onChanged: (value) {
-                                        widget.onUpdateExerciseValue(protocolExercise, 'exerciseName', value);
-                                      },
-                                    );
-                                  },
-                                );
-                              },
+                            Expanded(
+                              flex: 4,
+                              child: FutureBuilder<List<Exercise>>(
+                                future: widget.exercisesFuture,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) return const Center(child: Text('...'));
+                                  final exercises = snapshot.data!;
+                                  return Autocomplete<Exercise>(
+                                    key: ValueKey('autocomplete_${protocolExercise.id}'),
+                                    displayStringForOption: (option) => option.name,
+                                    initialValue: TextEditingValue(text: protocolExercise.exerciseName),
+                                    optionsBuilder: (TextEditingValue textEditingValue) {
+                                      if (textEditingValue.text.isEmpty) {
+                                        return const Iterable<Exercise>.empty();
+                                      }
+                                      return exercises.where((exercise) => exercise.name
+                                          .toLowerCase()
+                                          .contains(textEditingValue.text.toLowerCase()));
+                                    },
+                                    onSelected: (Exercise selection) {
+                                      widget.onUpdateExerciseValue(protocolExercise, 'exercise', selection);
+                                    },
+                                    fieldViewBuilder: (context, fieldController, fieldFocusNode, onFieldSubmitted) {
+                                      return TextFormField(
+                                        controller: fieldController,
+                                        focusNode: fieldFocusNode,
+                                        decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                        onChanged: (value) {
+                                          widget.onUpdateExerciseValue(protocolExercise, 'exerciseName', value);
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              key: ValueKey('reps_${protocolExercise.id}'),
-                              textAlign: TextAlign.center,
-                              initialValue: protocolExercise.repetitions.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
-                              onChanged: (value) {
-                                widget.onUpdateExerciseValue(protocolExercise, 'repetitions', int.tryParse(value) ?? 0);
-                              },
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                key: ValueKey('reps_${protocolExercise.id}'),
+                                textAlign: TextAlign.center,
+                                initialValue: protocolExercise.repetitions.toString(),
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                validator: (value) {
+                                  if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
+                                    return 'Invalide';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  final intValue = int.tryParse(value);
+                                  if (intValue != null) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'repetitions', intValue);
+                                  } else if (value.isEmpty) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'repetitions', 0);
+                                  }
+                                },
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              key: ValueKey('series_${protocolExercise.id}'),
-                              textAlign: TextAlign.center,
-                              initialValue: protocolExercise.series.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
-                              onChanged: (value) {
-                                widget.onUpdateExerciseValue(protocolExercise, 'series', int.tryParse(value) ?? 0);
-                              },
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                key: ValueKey('series_${protocolExercise.id}'),
+                                textAlign: TextAlign.center,
+                                initialValue: protocolExercise.series.toString(),
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                validator: (value) {
+                                  if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
+                                    return 'Invalide';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  final intValue = int.tryParse(value);
+                                  if (intValue != null) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'series', intValue);
+                                  } else if (value.isEmpty) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'series', 0);
+                                  }
+                                },
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              key: ValueKey('pause_${protocolExercise.id}'),
-                              textAlign: TextAlign.center,
-                              initialValue: protocolExercise.pause.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
-                              onChanged: (value) {
-                                widget.onUpdateExerciseValue(protocolExercise, 'pause', int.tryParse(value) ?? 0);
-                              },
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                key: ValueKey('pause_${protocolExercise.id}'),
+                                textAlign: TextAlign.center,
+                                initialValue: protocolExercise.pause.toString(),
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                validator: (value) {
+                                  if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
+                                    return 'Invalide';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  final intValue = int.tryParse(value);
+                                  if (intValue != null) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'pause', intValue);
+                                  } else if (value.isEmpty) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'pause', 0);
+                                  }
+                                },
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              key: ValueKey('tempo_${protocolExercise.id}'),
-                              textAlign: TextAlign.center,
-                              initialValue: protocolExercise.tempo,
-                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
-                              onChanged: (value) {
-                                widget.onUpdateExerciseValue(protocolExercise, 'tempo', value);
-                              },
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                key: ValueKey('tempo_${protocolExercise.id}'),
+                                textAlign: TextAlign.center,
+                                initialValue: protocolExercise.tempo,
+                                decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                onChanged: (value) {
+                                  widget.onUpdateExerciseValue(protocolExercise, 'tempo', value);
+                                },
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 4,
-                            child: TextFormField(
-                              key: ValueKey('notes_${protocolExercise.id}'),
-                              initialValue: protocolExercise.notes,
-                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
-                              onChanged: (value) {
-                                widget.onUpdateExerciseValue(protocolExercise, 'notes', value);
-                              },
+                            Expanded(
+                              flex: 4,
+                              child: TextFormField(
+                                key: ValueKey('notes_${protocolExercise.id}'),
+                                initialValue: protocolExercise.notes,
+                                decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                onChanged: (value) {
+                                  widget.onUpdateExerciseValue(protocolExercise, 'notes', value);
+                                },
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Theme.of(context).colorScheme.error,
-                            tooltip: 'Supprimer la ligne',
-                            onPressed: () => widget.onRemoveExercise(protocolExercise.id),
-                          ),
-                        ],
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              color: Theme.of(context).colorScheme.error,
+                              tooltip: 'Supprimer la ligne',
+                              onPressed: () => widget.onRemoveExercise(protocolExercise.id),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: widget.remarksController,
-            decoration: const InputDecoration(
-              labelText: 'Remarques globales',
-              border: OutlineInputBorder(),
+            const SizedBox(height: 16),
+            TextField(
+              controller: widget.remarksController,
+              decoration: const InputDecoration(
+                labelText: 'Remarques globales',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
             ),
-            maxLines: 3,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
