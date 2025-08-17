@@ -18,7 +18,8 @@ class ApiService {
   }
 
   Future<List<Protocol>> getProtocols() async {
-    final response = await http.get(Uri.parse('$_baseUrl/protocols'));
+    final uri = Uri.parse('$_baseUrl/protocols?_cb=${DateTime.now().millisecondsSinceEpoch}');
+    final response = await http.get(uri);
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => Protocol.fromJson(json)).toList();
@@ -44,6 +45,19 @@ class ApiService {
     final response = await http.delete(Uri.parse('$_baseUrl/protocols/$id'));
     if (response.statusCode != 204) {
       throw Exception('Failed to delete protocol');
+    }
+  }
+
+  Future<Protocol> updateProtocol(Protocol protocol) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/protocols/${protocol.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(protocol.toJson()),
+    );
+    if (response.statusCode == 200) {
+      return Protocol.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to update protocol. Status code: ${response.statusCode}, Body: ${response.body}');
     }
   }
 

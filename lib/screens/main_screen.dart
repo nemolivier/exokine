@@ -26,6 +26,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   late Future<List<Exercise>> _exercisesFuture;
   late TabController _tabController;
 
+  // State for current protocol management
+  Protocol? _currentProtocol;
+  bool _isDirty = false;
+
   List<ProtocolExercise> _currentProtocolExercises = [];
   final TextEditingController _remarksController = TextEditingController();
 
@@ -41,18 +45,35 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     _tabController.addListener(() {
       setState(() {}); // Rebuild to update FAB and view switcher
     });
+    _remarksController.addListener(() {
+      final originalRemarks = _currentProtocol?.remarks ?? '';
+      if (_remarksController.text != originalRemarks) {
+        if (!_isDirty) {
+          setState(() {
+            _isDirty = true;
+          });
+        }
+      }
+    });
     _protocolsFuture = _apiService.getProtocols();
     _exercisesFuture = _apiService.getExercises();
 
     // Add 3 default rows
-    _addEmptyExercise();
-    _addEmptyExercise();
-    _addEmptyExercise();
+    _currentProtocolExercises = [
+      _createEmptyExercise(),
+      _createEmptyExercise(),
+      _createEmptyExercise(),
+    ];
   }
 
-  void _addEmptyExercise() {
-    final newExercise = _createEmptyExercise();
-    _currentProtocolExercises.add(newExercise);
+  void _addEmptyExercise({bool setDirty = true}) {
+    setState(() {
+      final newExercise = _createEmptyExercise();
+      _currentProtocolExercises.add(newExercise);
+      if (setDirty) {
+        _isDirty = true;
+      }
+    });
   }
 
   ProtocolExercise _createEmptyExercise() {
@@ -100,13 +121,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             currentProtocolExercises: _currentProtocolExercises,
             exercisesFuture: _exercisesFuture,
             onRemoveExercise: _removeExercise,
-            onAddExerciseRow: () {
-              setState(() {
-                _addEmptyExercise();
-              });
-            },
+            onAddExerciseRow: _addEmptyExercise,
             onUpdateExerciseValue: _updateProtocolExerciseValue,
             remarksController: _remarksController,
+            currentProtocolName: _currentProtocol?.name,
           ),
           ProgrammesView(
             protocolsFuture: _protocolsFuture,
@@ -115,6 +133,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               setState(() {
                 _currentProtocolExercises = protocol.exercises;
                 _remarksController.text = protocol.remarks ?? '';
+                _currentProtocol = protocol;
+                _isDirty = false;
               });
               _tabController.animateTo(0);
             },
@@ -136,6 +156,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
 
   void _updateProtocolExerciseValue(ProtocolExercise exercise, String field, dynamic value) {
     setState(() {
+      _isDirty = true;
       switch (field) {
         case 'days':
           exercise.days = value as List<String>;
@@ -207,7 +228,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             const SizedBox(width: 16),
             FloatingActionButton.extended(
               heroTag: 'save_protocol',
-              onPressed: _saveProtocol,
+              onPressed: _isDirty ? _saveOrUpdateProtocol : null,
               label: const Text('Sauvegarder'),
               icon: const Icon(Icons.save),
             ),
@@ -447,6 +468,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
 
   void _addExerciseToCurrentProtocol(Exercise exercise) {
     setState(() {
+      _isDirty = true;
       final newProtocolExercise = _createEmptyExercise();
       newProtocolExercise.exerciseId = exercise.id;
       newProtocolExercise.exerciseName = exercise.name;
@@ -477,9 +499,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
 
   void _removeExercise(int id) {
     setState(() {
+      _isDirty = true;
       _currentProtocolExercises.removeWhere((exercise) => exercise.id == id);
       if (_currentProtocolExercises.isEmpty) {
         _remarksController.clear();
+        _currentProtocol = null; // It's a new program now
       }
     });
     if (id > 0 && !id.toString().startsWith('1')) { // Don't delete default exercises
@@ -491,54 +515,142 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     }
   }
 
-  void _saveProtocol() async {
-    final nameController = TextEditingController();
-    showDialog(
+  void _saveOrUpdateProtocol() async {
+    // Case 1: It's an existing protocol that has been modified.
+    if (_currentProtocol != null) {
+      showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Nom du programme'),
-            content: TextField(
-              controller: nameController,
-              decoration: const InputDecoration(hintText: "Entrez un nom"),
-            ),
+            title: const Text('Sauvegarder les modifications'),
+            content: Text('Voulez-vous écraser le programme existant "${_currentProtocol!.name}" ou l\'enregistrer sous un nouveau nom ?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('Annuler'),
               ),
+              FilledButton.tonal(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the choice dialog
+                  _saveAsNewProtocol(); // Call the "save as" logic
+                },
+                child: const Text('Enregistrer sous...'),
+              ),
               FilledButton(
                 onPressed: () async {
-                  if (nameController.text.isNotEmpty) {
+                  // Overwrite logic here
+                  final updatedProtocol = Protocol(
+                    id: _currentProtocol!.id,
+                    name: _currentProtocol!.name,
+                    remarks: _remarksController.text,
+                    exercises: _currentProtocolExercises.where((ex) => ex.exerciseId != 0).toList(),
+                  );
+                  try {
+                    final result = await _apiService.updateProtocol(updatedProtocol);
+                    setState(() {
+                      _isDirty = false;
+                      _protocolsFuture = _apiService.getProtocols();
+                      _currentProtocol = result; // Update with returned protocol
+                    });
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Programme mis à jour !')),
+                    );
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur: ${e.toString()}')),
+                    );
+                  }
+                },
+                child: const Text('Écraser'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // Case 2: It's a new protocol.
+      _saveAsNewProtocol();
+    }
+  }
+
+  void _saveAsNewProtocol() async {
+    final nameController = TextEditingController();
+    // I need the list of existing protocol names for validation
+    final protocols = await _protocolsFuture;
+    final existingNames = protocols.map((p) => p.name.toLowerCase()).toList();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        String? errorText;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Enregistrer sous un nouveau nom'),
+              content: TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: "Entrez un nom",
+                  errorText: errorText,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Annuler'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final newName = nameController.text;
+                    if (newName.isEmpty) {
+                      setState(() {
+                        errorText = 'Le nom ne peut pas être vide.';
+                      });
+                      return;
+                    }
+                    if (existingNames.contains(newName.toLowerCase())) {
+                      setState(() {
+                        errorText = 'Ce nom existe déjà.';
+                      });
+                      return;
+                    }
+
                     final newProtocol = Protocol(
-                      id: 0,
-                      name: nameController.text,
+                      id: 0, // 0 for creation
+                      name: newName,
                       remarks: _remarksController.text,
-                      exercises: _currentProtocolExercises
-                          .where((ex) => ex.exerciseId != 0)
-                          .toList(),
+                      exercises: _currentProtocolExercises.where((ex) => ex.exerciseId != 0).toList(),
                     );
                     try {
-                      await _apiService.createProtocol(newProtocol);
-                      setState(() {
+                      final createdProtocol = await _apiService.createProtocol(newProtocol);
+                      // Using this.setState because we are out of the StatefulBuilder's scope
+                      this.setState(() {
                         _protocolsFuture = _apiService.getProtocols();
+                        _currentProtocol = createdProtocol;
+                        _isDirty = false;
                       });
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Programme sauvegardé!')), 
+                        const SnackBar(content: Text('Programme sauvegardé !')),
                       );
                     } catch (e) {
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Erreur: ${e.toString()}')),
                       );
                     }
-                  }
-                },
-                child: const Text('Sauvegarder'),
-              ),
-            ],
-          );
-        });
+                  },
+                  child: const Text('Sauvegarder'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showPrintDialog() {

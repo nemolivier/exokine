@@ -67,6 +67,52 @@ router.delete('/protocols/:id', async (req, res) => {
   }
 });
 
+router.put('/protocols/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, remarks, exercises } = req.body;
+
+  try {
+    const updatedProtocol = await prisma.$transaction(async (prisma) => {
+      await prisma.protocolExercise.deleteMany({
+        where: { protocolId: parseInt(id) },
+      });
+
+      const protocol = await prisma.protocol.update({
+        where: { id: parseInt(id) },
+        data: {
+          remarks,
+          exercises: {
+            create: exercises?.map((ex: any) => ({
+              repetitions: ex.repetitions,
+              series: ex.series,
+              pause: ex.pause,
+              tempo: ex.tempo,
+              notes: ex.notes,
+              days: ex.days.join(','),
+              exercise: { connect: { id: ex.exerciseId } },
+            })) ?? [],
+          },
+        },
+        include: { exercises: { include: { exercise: true } } },
+      });
+
+      return protocol;
+    });
+
+    const responseProtocol = {
+      ...updatedProtocol,
+      exercises: updatedProtocol.exercises.map(ex => ({
+        ...ex,
+        days: ex.days.split(',').filter(d => d),
+      })),
+    };
+
+    res.status(200).json(responseProtocol);
+  } catch (error) {
+    res.status(404).json({ error: "Failed to update protocol. Protocol not found." });
+  }
+});
+
 // Routes pour les Exercices dans un Protocole
 router.post('/protocols/:protocolId/exercises', async (req, res) => {
   const { protocolId } = req.params;
