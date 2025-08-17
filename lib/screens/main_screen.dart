@@ -91,13 +91,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         ),
         actions: [
           _buildViewSwitcherButton(),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: FilledButton.tonal(
-              onPressed: () => _showPrintDialog(),
-              child: const Text('Imprimer'),
-            ),
-          ),
         ],
       ),
       body: TabBarView(
@@ -202,11 +195,23 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   Widget? _buildFloatingActionButton() {
     switch (_tabController.index) {
       case 0: // Principal
-        return FloatingActionButton.extended(
-          heroTag: 'save_protocol',
-          onPressed: _saveProtocol,
-          label: const Text('Sauvegarder'),
-          icon: const Icon(Icons.save),
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton.extended(
+              heroTag: 'print_protocol',
+              onPressed: _showPrintDialog,
+              label: const Text('Imprimer'),
+              icon: const Icon(Icons.print),
+            ),
+            const SizedBox(width: 16),
+            FloatingActionButton.extended(
+              heroTag: 'save_protocol',
+              onPressed: _saveProtocol,
+              label: const Text('Sauvegarder'),
+              icon: const Icon(Icons.save),
+            ),
+          ],
         );
       case 2: // Exercices
         return FloatingActionButton(

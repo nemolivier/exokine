@@ -241,7 +241,7 @@ class _PrincipalViewState extends State<PrincipalView> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0, right: 4.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     FloatingActionButton.extended(
                       heroTag: 'add_exercise_row',
