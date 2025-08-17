@@ -114,6 +114,9 @@ class _PrincipalViewState extends State<PrincipalView> {
                                         onChanged: (value) {
                                           widget.onUpdateExerciseValue(protocolExercise, 'exerciseName', value);
                                         },
+                                        onFieldSubmitted: (String value) {
+                                          onFieldSubmitted();
+                                        },
                                       );
                                     },
                                   );
