@@ -107,6 +107,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             currentProtocolExercises: _currentProtocolExercises,
             exercisesFuture: _exercisesFuture,
             onRemoveExercise: _removeExercise,
+            onAddExerciseRow: () {
+              setState(() {
+                _addEmptyExercise();
+              });
+            },
             onUpdateExerciseValue: _updateProtocolExerciseValue,
             remarksController: _remarksController,
           ),
@@ -197,27 +202,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   Widget? _buildFloatingActionButton() {
     switch (_tabController.index) {
       case 0: // Principal
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              heroTag: 'add_exercise',
-              onPressed: () {
-                setState(() {
-                  _addEmptyExercise();
-                });
-              },
-              tooltip: 'Ajouter une ligne',
-              child: const Icon(Icons.add),
-            ),
-            const SizedBox(width: 16),
-            FloatingActionButton.extended(
-              heroTag: 'save_protocol',
-              onPressed: _saveProtocol,
-              label: const Text('Sauvegarder'),
-              icon: const Icon(Icons.save),
-            ),
-          ],
+        return FloatingActionButton.extended(
+          heroTag: 'save_protocol',
+          onPressed: _saveProtocol,
+          label: const Text('Sauvegarder'),
+          icon: const Icon(Icons.save),
         );
       case 2: // Exercices
         return FloatingActionButton(

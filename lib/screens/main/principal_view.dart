@@ -9,6 +9,7 @@ class PrincipalView extends StatefulWidget {
   final List<ProtocolExercise> currentProtocolExercises;
   final Future<List<Exercise>> exercisesFuture;
   final Function(int) onRemoveExercise;
+  final Function() onAddExerciseRow;
   final Function(ProtocolExercise, String, dynamic) onUpdateExerciseValue;
   final TextEditingController remarksController;
 
@@ -17,6 +18,7 @@ class PrincipalView extends StatefulWidget {
     required this.currentProtocolExercises,
     required this.exercisesFuture,
     required this.onRemoveExercise,
+    required this.onAddExerciseRow,
     required this.onUpdateExerciseValue,
     required this.remarksController,
   });
@@ -50,15 +52,17 @@ class _PrincipalViewState extends State<PrincipalView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: ListView.builder(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _buildHeader(context),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: widget.currentProtocolExercises.length,
                 itemBuilder: (context, index) {
                   final protocolExercise = widget.currentProtocolExercises[index];
@@ -234,17 +238,31 @@ class _PrincipalViewState extends State<PrincipalView> {
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: widget.remarksController,
-              decoration: const InputDecoration(
-                labelText: 'Remarques globales',
-                border: OutlineInputBorder(),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, right: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                      heroTag: 'add_exercise_row',
+                      onPressed: widget.onAddExerciseRow,
+                      label: const Text('Ajouter une ligne'),
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
               ),
-              maxLines: 3,
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: widget.remarksController,
+                decoration: const InputDecoration(
+                  labelText: 'Remarques globales',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );
