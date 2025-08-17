@@ -43,10 +43,10 @@ class ProgrammesView extends StatelessWidget {
           return GridView.builder(
             padding: const EdgeInsets.all(16.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: 5,
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 16.0,
-              childAspectRatio: 1 / 1.2,
+              childAspectRatio: 1.0,
             ),
             itemCount: protocols.length,
             itemBuilder: (context, index) {
@@ -55,14 +55,13 @@ class ProgrammesView extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () => onSelectProtocol(protocol),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: Container(
-                          color: Theme.of(context).colorScheme.secondaryContainer,
-                          child: Center(
+                      Container(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
                               protocol.name,
                               textAlign: TextAlign.center,
@@ -71,25 +70,19 @@ class ProgrammesView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                protocol.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                            ),
-                            FloatingActionButton.small(
-                              heroTag: 'delete_protocol_grid_${protocol.id}',
-                              backgroundColor: Theme.of(context).colorScheme.error,
-                              onPressed: () => onDeleteProtocol(protocol),
-                              child: const Icon(Icons.delete),
-                            ),
-                          ],
+                      Positioned(
+                        bottom: 4,
+                        right: 4,
+                        child: IconButton.filled(
+                          iconSize: 18,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.delete),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.error,
+                            foregroundColor: Theme.of(context).colorScheme.onError,
+                          ),
+                          onPressed: () => onDeleteProtocol(protocol),
                         ),
                       ),
                     ],
@@ -105,18 +98,13 @@ class ProgrammesView extends StatelessWidget {
           itemBuilder: (context, index) {
             final protocol = protocols[index];
             return Card.outlined(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0),
-                side: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1),
-              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
               child: ListTile(
-                title: Text(protocol.name, style: Theme.of(context).textTheme.titleLarge),
-                trailing: FloatingActionButton.small(
-                  heroTag: 'delete_protocol_${protocol.id}',
-                  backgroundColor: Theme.of(context).colorScheme.error,
+                title: Text(protocol.name),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  color: Theme.of(context).colorScheme.error,
                   onPressed: () => onDeleteProtocol(protocol),
-                  child: const Icon(Icons.delete),
                 ),
                 onTap: () => onSelectProtocol(protocol),
               ),
