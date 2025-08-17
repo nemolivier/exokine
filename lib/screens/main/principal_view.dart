@@ -62,8 +62,8 @@ class _PrincipalViewState extends State<PrincipalView> {
                 itemCount: widget.currentProtocolExercises.length,
                 itemBuilder: (context, index) {
                   final protocolExercise = widget.currentProtocolExercises[index];
-                  return Card.outlined(
-                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                       child: IntrinsicHeight(
@@ -106,7 +106,11 @@ class _PrincipalViewState extends State<PrincipalView> {
                                       return TextFormField(
                                         controller: fieldController,
                                         focusNode: fieldFocusNode,
-                                        decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                        decoration: const InputDecoration(
+                                          hintText: 'Taper pour chercher...',
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                        ),
                                         onChanged: (value) {
                                           widget.onUpdateExerciseValue(protocolExercise, 'exerciseName', value);
                                         },
