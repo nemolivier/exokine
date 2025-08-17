@@ -28,154 +28,165 @@ class PrincipalView extends StatefulWidget {
 class _PrincipalViewState extends State<PrincipalView> {
   final List<String> _dayAbbreviations = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
+  Widget _buildHeader(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: Text('Jour', style: textTheme)),
+          Expanded(flex: 4, child: Text('Exercice', style: textTheme)),
+          Expanded(flex: 2, child: Text('Répétitions', style: textTheme, textAlign: TextAlign.center)),
+          Expanded(flex: 2, child: Text('Séries', style: textTheme, textAlign: TextAlign.center)),
+          Expanded(flex: 2, child: Text('Pause (s)', style: textTheme, textAlign: TextAlign.center)),
+          Expanded(flex: 2, child: Text('Tempo', style: textTheme, textAlign: TextAlign.center)),
+          Expanded(flex: 4, child: Text('Remarques', style: textTheme)),
+          const SizedBox(width: 48), // For the delete button
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
+          _buildHeader(context),
           Expanded(
-            child: Card(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              clipBehavior: Clip.antiAlias,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Jour')),
-                    DataColumn(label: Text('Exercice')),
-                    DataColumn(label: Text('Répétitions')),
-                    DataColumn(label: Text('Séries')),
-                    DataColumn(label: Text('Pause (s)')),
-                    DataColumn(label: Text('Tempo')),
-                    DataColumn(label: Text('Remarques')),
-                    DataColumn(label: Text('Actions')),
-                  ],
-                  rows: widget.currentProtocolExercises.map((protocolExercise) {
-                    return DataRow(
-                      cells: [
-                        DataCell(
-                          MultiSelectDropdown(
-                            key: ValueKey(protocolExercise.id),
-                            items: _dayAbbreviations,
-                            selectedItems: protocolExercise.days,
-                            onSelectionChanged: (selectedDays) {
-                              widget.onUpdateExerciseValue(protocolExercise, 'days', selectedDays);
-                            },
+            child: ListView.builder(
+              itemCount: widget.currentProtocolExercises.length,
+              itemBuilder: (context, index) {
+                final protocolExercise = widget.currentProtocolExercises[index];
+                return Card.outlined(
+                  margin: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: MultiSelectDropdown(
+                              key: ValueKey(protocolExercise.id),
+                              items: _dayAbbreviations,
+                              selectedItems: protocolExercise.days,
+                              onSelectionChanged: (selectedDays) {
+                                widget.onUpdateExerciseValue(protocolExercise, 'days', selectedDays);
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
-                          FutureBuilder<List<Exercise>>(
-                            future: widget.exercisesFuture,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) return const Text('...');
-                              final exercises = snapshot.data!;
-                              return Autocomplete<Exercise>(
-                                key: ValueKey('autocomplete_${protocolExercise.id}'),
-                                displayStringForOption: (option) => option.name,
-                                initialValue: TextEditingValue(text: protocolExercise.exerciseName),
-                                optionsBuilder: (TextEditingValue textEditingValue) {
-                                  if (textEditingValue.text.isEmpty) {
-                                    return const Iterable<Exercise>.empty();
-                                  }
-                                  return exercises.where((exercise) => exercise.name
-                                      .toLowerCase()
-                                      .contains(textEditingValue.text.toLowerCase()));
-                                },
-                                onSelected: (Exercise selection) {
-                                  widget.onUpdateExerciseValue(protocolExercise, 'exercise', selection);
-                                },
-                                fieldViewBuilder: (BuildContext context, TextEditingController fieldController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                                  return TextFormField(
-                                    controller: fieldController,
-                                    focusNode: fieldFocusNode,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Sélectionner...',
-                                      border: InputBorder.none,
-                                      filled: true,
-                                    ),
-                                    onChanged: (value) {
-                                       widget.onUpdateExerciseValue(protocolExercise, 'exerciseName', value);
-                                    },
-                                    onFieldSubmitted: (value) {
-                                      final options = exercises.where((exercise) => exercise.name
-                                          .toLowerCase()
-                                          .contains(value.toLowerCase()));
-                                      if (options.isNotEmpty) {
-                                        widget.onUpdateExerciseValue(protocolExercise, 'exercise', options.first);
-                                        fieldController.text = options.first.name;
-                                      }
-                                    },
-                                  );
-                                },
-                              );
-                            },
+                          Expanded(
+                            flex: 4,
+                            child: FutureBuilder<List<Exercise>>(
+                              future: widget.exercisesFuture,
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) return const Center(child: Text('...'));
+                                final exercises = snapshot.data!;
+                                return Autocomplete<Exercise>(
+                                  key: ValueKey('autocomplete_${protocolExercise.id}'),
+                                  displayStringForOption: (option) => option.name,
+                                  initialValue: TextEditingValue(text: protocolExercise.exerciseName),
+                                  optionsBuilder: (TextEditingValue textEditingValue) {
+                                    if (textEditingValue.text.isEmpty) {
+                                      return const Iterable<Exercise>.empty();
+                                    }
+                                    return exercises.where((exercise) => exercise.name
+                                        .toLowerCase()
+                                        .contains(textEditingValue.text.toLowerCase()));
+                                  },
+                                  onSelected: (Exercise selection) {
+                                    widget.onUpdateExerciseValue(protocolExercise, 'exercise', selection);
+                                  },
+                                  fieldViewBuilder: (context, fieldController, fieldFocusNode, onFieldSubmitted) {
+                                    return TextFormField(
+                                      controller: fieldController,
+                                      focusNode: fieldFocusNode,
+                                      decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                                      onChanged: (value) {
+                                        widget.onUpdateExerciseValue(protocolExercise, 'exerciseName', value);
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
-                          TextFormField(
-                            key: ValueKey('reps_${protocolExercise.id}'),
-                            initialValue: protocolExercise.repetitions.toString(),
-                            keyboardType: TextInputType.number,
-                             decoration: const InputDecoration(border: InputBorder.none, filled: true),
-                            onChanged: (value) {
-                              widget.onUpdateExerciseValue(protocolExercise, 'repetitions', int.tryParse(value) ?? 0);
-                            },
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              key: ValueKey('reps_${protocolExercise.id}'),
+                              textAlign: TextAlign.center,
+                              initialValue: protocolExercise.repetitions.toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                              onChanged: (value) {
+                                widget.onUpdateExerciseValue(protocolExercise, 'repetitions', int.tryParse(value) ?? 0);
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
-                          TextFormField(
-                            key: ValueKey('series_${protocolExercise.id}'),
-                            initialValue: protocolExercise.series.toString(),
-                            keyboardType: TextInputType.number,
-                             decoration: const InputDecoration(border: InputBorder.none, filled: true),
-                            onChanged: (value) {
-                              widget.onUpdateExerciseValue(protocolExercise, 'series', int.tryParse(value) ?? 0);
-                            },
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              key: ValueKey('series_${protocolExercise.id}'),
+                              textAlign: TextAlign.center,
+                              initialValue: protocolExercise.series.toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                              onChanged: (value) {
+                                widget.onUpdateExerciseValue(protocolExercise, 'series', int.tryParse(value) ?? 0);
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
-                          TextFormField(
-                            key: ValueKey('pause_${protocolExercise.id}'),
-                            initialValue: protocolExercise.pause.toString(),
-                            keyboardType: TextInputType.number,
-                             decoration: const InputDecoration(border: InputBorder.none, filled: true),
-                            onChanged: (value) {
-                              widget.onUpdateExerciseValue(protocolExercise, 'pause', int.tryParse(value) ?? 0);
-                            },
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              key: ValueKey('pause_${protocolExercise.id}'),
+                              textAlign: TextAlign.center,
+                              initialValue: protocolExercise.pause.toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                              onChanged: (value) {
+                                widget.onUpdateExerciseValue(protocolExercise, 'pause', int.tryParse(value) ?? 0);
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
-                          TextFormField(
-                            key: ValueKey('tempo_${protocolExercise.id}'),
-                            initialValue: protocolExercise.tempo,
-                             decoration: const InputDecoration(border: InputBorder.none, filled: true),
-                            onChanged: (value) {
-                              widget.onUpdateExerciseValue(protocolExercise, 'tempo', value);
-                            },
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              key: ValueKey('tempo_${protocolExercise.id}'),
+                              textAlign: TextAlign.center,
+                              initialValue: protocolExercise.tempo,
+                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                              onChanged: (value) {
+                                widget.onUpdateExerciseValue(protocolExercise, 'tempo', value);
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
-                          TextFormField(
-                            key: ValueKey('notes_${protocolExercise.id}'),
-                            initialValue: protocolExercise.notes,
-                             decoration: const InputDecoration(border: InputBorder.none, filled: true),
-                            onChanged: (value) {
-                              widget.onUpdateExerciseValue(protocolExercise, 'notes', value);
-                            },
+                          Expanded(
+                            flex: 4,
+                            child: TextFormField(
+                              key: ValueKey('notes_${protocolExercise.id}'),
+                              initialValue: protocolExercise.notes,
+                              decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(8)),
+                              onChanged: (value) {
+                                widget.onUpdateExerciseValue(protocolExercise, 'notes', value);
+                              },
+                            ),
                           ),
-                        ),
-                        DataCell(
                           IconButton(
                             icon: const Icon(Icons.delete),
+                            color: Theme.of(context).colorScheme.error,
+                            tooltip: 'Supprimer la ligne',
                             onPressed: () => widget.onRemoveExercise(protocolExercise.id),
                           ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 16),
