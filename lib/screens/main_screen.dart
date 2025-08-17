@@ -128,6 +128,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             onAddExercise: _showAddExerciseDialog,
             onEditExercise: _showEditExerciseDialog,
             onDeleteExercise: _showDeleteExerciseConfirmDialog,
+            onAddToProtocol: _addExerciseToCurrentProtocol,
           ),
         ],
       ),
@@ -316,6 +317,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     final TextEditingController nameController = TextEditingController();
     final TextEditingController articulationController = TextEditingController();
     final TextEditingController musclesController = TextEditingController();
+    final TextEditingController typeController = TextEditingController();
 
     showDialog(
       context: context,
@@ -338,6 +340,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   controller: musclesController,
                   decoration: const InputDecoration(hintText: "Muscles (séparées par des virgules)"),
                 ),
+                TextField(
+                  controller: typeController,
+                  decoration: const InputDecoration(hintText: "Type (ex: Équilibre, Renforcement)"),
+                ),
               ],
             ),
           ),
@@ -354,6 +360,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       nameController.text,
                       articulationController.text.split(',').map((e) => e.trim()).toList(),
                       musclesController.text.split(',').map((e) => e.trim()).toList(),
+                      typeController.text,
                     );
                     setState(() {
                       _exercisesFuture = _apiService.getExercises();
@@ -378,6 +385,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     final TextEditingController nameController = TextEditingController(text: exercise.name);
     final TextEditingController articulationController = TextEditingController(text: exercise.articulation.join(', '));
     final TextEditingController musclesController = TextEditingController(text: exercise.muscles.join(', '));
+    final TextEditingController typeController = TextEditingController(text: exercise.type);
 
     showDialog(
       context: context,
@@ -400,6 +408,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   controller: musclesController,
                   decoration: const InputDecoration(hintText: "Muscles (séparées par des virgules)"),
                 ),
+                TextField(
+                  controller: typeController,
+                  decoration: const InputDecoration(hintText: "Type (ex: Équilibre, Renforcement)"),
+                ),
               ],
             ),
           ),
@@ -417,6 +429,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       name: nameController.text,
                       articulation: articulationController.text.split(',').map((e) => e.trim()).toList(),
                       muscles: musclesController.text.split(',').map((e) => e.trim()).toList(),
+                      type: typeController.text,
                     );
                     await _apiService.updateExercise(updatedExercise);
                     setState(() {
@@ -435,6 +448,36 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           ],
         );
       },
+    );
+  }
+
+  void _addExerciseToCurrentProtocol(Exercise exercise) {
+    setState(() {
+      final newProtocolExercise = _createEmptyExercise();
+      newProtocolExercise.exerciseId = exercise.id;
+      newProtocolExercise.exerciseName = exercise.name;
+
+      // Try to replace the first empty row
+      final emptyRowIndex = _currentProtocolExercises.indexWhere((ex) => ex.exerciseId == 0);
+
+      if (emptyRowIndex != -1) {
+        _currentProtocolExercises[emptyRowIndex] = newProtocolExercise;
+      } else {
+        _currentProtocolExercises.add(newProtocolExercise);
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"${exercise.name}" ajouté au programme.'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'VOIR',
+          onPressed: () {
+            _tabController.animateTo(0);
+          },
+        ),
+      ),
     );
   }
 

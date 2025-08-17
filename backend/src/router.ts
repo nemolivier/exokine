@@ -98,13 +98,14 @@ router.get('/exercises', async (req, res) => {
 });
 
 router.post('/exercises', async (req, res) => {
-  const { name, articulation, muscles } = req.body;
+  const { name, articulation, muscles, type } = req.body;
   try {
     const exercise = await prisma.exercise.create({
       data: {
         name,
         articulation: articulation?.join(','),
         muscles: muscles?.join(','),
+        type,
       },
     });
     res.status(201).json({
@@ -119,7 +120,7 @@ router.post('/exercises', async (req, res) => {
 
 router.put('/exercises/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, articulation, muscles } = req.body;
+  const { name, articulation, muscles, type } = req.body;
   try {
     const updatedExercise = await prisma.exercise.update({
       where: { id: parseInt(id) },
@@ -127,6 +128,7 @@ router.put('/exercises/:id', async (req, res) => {
         name,
         articulation: articulation?.join(','),
         muscles: muscles?.join(','),
+        type,
       },
     });
     res.status(200).json({

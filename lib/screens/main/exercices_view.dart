@@ -10,6 +10,7 @@ class ExercicesView extends StatelessWidget {
   final Function() onAddExercise;
   final Function(Exercise) onEditExercise;
   final Function(Exercise) onDeleteExercise;
+  final Function(Exercise) onAddToProtocol;
   final bool isGridView;
 
   const ExercicesView({
@@ -18,6 +19,7 @@ class ExercicesView extends StatelessWidget {
     required this.onAddExercise,
     required this.onEditExercise,
     required this.onDeleteExercise,
+    required this.onAddToProtocol,
     required this.isGridView,
   });
 
@@ -80,6 +82,15 @@ class ExercicesView extends StatelessWidget {
                               iconSize: 18,
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
+                              tooltip: 'Ajouter au programme',
+                              icon: const Icon(Icons.add),
+                              onPressed: () => onAddToProtocol(exercise),
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton.filledTonal(
+                              iconSize: 18,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                               icon: const Icon(Icons.edit),
                               onPressed: () => onEditExercise(exercise),
                             ),
@@ -118,6 +129,11 @@ class ExercicesView extends StatelessWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () => onAddToProtocol(exercise),
+                      tooltip: 'Ajouter au programme',
+                    ),
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () => onEditExercise(exercise),

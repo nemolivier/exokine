@@ -54,11 +54,11 @@ class ApiService {
     }
   }
 
-  Future<Exercise> createExercise(String name, List<String> articulation, List<String> muscles) async {
+  Future<Exercise> createExercise(String name, List<String> articulation, List<String> muscles, String? type) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/exercises'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'name': name, 'articulation': articulation, 'muscles': muscles}),
+      body: json.encode({'name': name, 'articulation': articulation, 'muscles': muscles, 'type': type}),
     );
     if (response.statusCode == 201) {
       return Exercise.fromJson(json.decode(response.body));
