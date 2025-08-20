@@ -717,6 +717,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     final displayDate = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
     final fileName = "$personName - $formattedDate.pdf";
 
+    final font = await PdfGoogleFonts.robotoRegular();
+    final fontBold = await PdfGoogleFonts.robotoBold();
+    final fontItalic = await PdfGoogleFonts.robotoItalic();
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4.landscape,
@@ -724,17 +728,15 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           return pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('Programme d\'exercices pour : $personName', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Date: $displayDate', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text('Programme d\'exercices pour : $personName', style: pw.TextStyle(fontSize: 24, font: fontBold)),
+              pw.Text('Date: $displayDate', style: pw.TextStyle(fontSize: 14, font: font)),
             ]
           );
         },
         build: (pw.Context context) => [
           pw.SizedBox(height: 20),
-          if (_remarksController.text.isNotEmpty) ...[
-            pw.Text('Remarques globales: ${_remarksController.text}', style: pw.TextStyle(fontSize: 12, fontStyle: pw.FontStyle.italic)),
-            pw.SizedBox(height: 10),
-          ],
+          pw.Text('TEST: Remarques globales hardcoded', style: pw.TextStyle(fontSize: 12, font: fontItalic)),
+          pw.SizedBox(height: 10),
           pw.TableHelper.fromTextArray(
             headers: ['Jour', 'Exercice', 'Répétitions', 'Séries', 'Pause (s)', 'Tempo', 'Remarques'],
             data: _currentProtocolExercises.map((ex) => [
@@ -746,6 +748,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               ex.tempo,
               ex.notes ?? '',
             ]).toList(),
+            cellStyle: pw.TextStyle(font: font), // Apply font to table cells
+            headerStyle: pw.TextStyle(font: fontBold), // Apply bold font to table headers
           ),
         ],
         footer: (pw.Context context) {
@@ -753,7 +757,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
             alignment: pw.Alignment.centerRight,
             child: pw.Text(
               'Nom du fichier : $fileName',
-              style: const pw.TextStyle(color: PdfColors.grey, fontSize: 10),
+              style: pw.TextStyle(color: PdfColors.grey, fontSize: 10, font: font),
             ),
           );
         },
