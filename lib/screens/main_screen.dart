@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -8,7 +7,7 @@ import '../models/protocol.dart';
 import '../models/protocol_exercise.dart';
 import '../models/exercise.dart';
 import '../services/api_service.dart';
-import '../widgets/multi_select_dropdown.dart';
+
 import './main/principal_view.dart';
 import './main/programmes_view.dart';
 import './main/exercices_view.dart';
@@ -35,8 +34,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
 
   bool _isProgrammesGridView = false;
   bool _isExercicesGridView = false;
-
-  final List<String> _dayAbbreviations = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
   @override
   void initState() {
@@ -266,6 +263,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               onPressed: () async {
                 try {
                   await _apiService.deleteProtocol(protocol.id);
+                  if (!mounted) return;
                   setState(() {
                     _protocolsFuture = _apiService.getProtocols();
                   });
@@ -274,10 +272,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     const SnackBar(content: Text('Programme supprimé avec succès.')),
                   );
                 } catch (e) {
-                  Navigator.of(context).pop(); // Close the dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
-                  );
+                  if (mounted) {
+                    Navigator.of(context).pop(); // Close the dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
+                    );
+                  }
                 }
               },
             ),
@@ -293,7 +293,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmer la suppression'),
-          content: Text('Êtes-vous sûr de vouloir supprimer l\'exercice "${exercise.name}" ? Cette action est irréversible.'),
+          content: Text('''Êtes-vous sûr de vouloir supprimer l'exercice "${exercise.name}" ? Cette action est irréversible.'''),
           actions: <Widget>[
             TextButton(
               child: const Text('Annuler'),
@@ -307,6 +307,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               onPressed: () async {
                 try {
                   await _apiService.deleteExercise(exercise.id);
+                  if (!mounted) return;
                   setState(() {
                     _exercisesFuture = _apiService.getExercises();
                   });
@@ -314,11 +315,13 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Exercice supprimé avec succès.')),
                   );
-                } catch (e) {
-                  Navigator.of(context).pop(); // Close the dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
-                  );
+                }
+                catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
+                    );
+                  }
                 }
               },
             ),
@@ -377,14 +380,18 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       musclesController.text.split(',').map((e) => e.trim()).toList(),
                       typeController.text,
                     );
-                    setState(() {
-                      _exercisesFuture = _apiService.getExercises();
-                    });
-                    Navigator.of(context).pop();
+                    if (mounted) {
+                      setState(() {
+                        _exercisesFuture = _apiService.getExercises();
+                      });
+                      Navigator.of(context).pop();
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur: ${e.toString()}')),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: ${e.toString()}')),
+                      );
+                    }
                   }
                 }
               },
@@ -406,14 +413,14 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Modifier l\'exercice'),
+          title: const Text("Modifier l'exercice"),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(hintText: "Nom de l\'exercice"),
+                  decoration: const InputDecoration(hintText: "Nom de l'exercice"),
                 ),
                 TextField(
                   controller: articulationController,
@@ -447,14 +454,18 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       type: typeController.text,
                     );
                     await _apiService.updateExercise(updatedExercise);
-                    setState(() {
-                      _exercisesFuture = _apiService.getExercises();
-                    });
-                    Navigator.of(context).pop();
+                    if (mounted) {
+                      setState(() {
+                        _exercisesFuture = _apiService.getExercises();
+                      });
+                      Navigator.of(context).pop();
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur: ${e.toString()}')),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: ${e.toString()}')),
+                      );
+                    }
                   }
                 }
               },
@@ -547,6 +558,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   );
                   try {
                     final result = await _apiService.updateProtocol(updatedProtocol);
+                    if (!mounted) return;
                     setState(() {
                       _isDirty = false;
                       _protocolsFuture = _apiService.getProtocols();
@@ -557,10 +569,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       const SnackBar(content: Text('Programme mis à jour !')),
                     );
                   } catch (e) {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur: ${e.toString()}')),
-                    );
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: ${e.toString()}')),
+                      );
+                    }
                   }
                 },
                 child: const Text('Écraser'),
@@ -626,6 +640,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     );
                     try {
                       final createdProtocol = await _apiService.createProtocol(newProtocol);
+                      if (!mounted) return;
                       // Using this.setState because we are out of the StatefulBuilder's scope
                       this.setState(() {
                         _protocolsFuture = _apiService.getProtocols();
@@ -637,10 +652,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                         const SnackBar(content: Text('Programme sauvegardé !')),
                       );
                     } catch (e) {
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Erreur: ${e.toString()}')),
-                      );
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Erreur: ${e.toString()}')),
+                        );
+                      }
                     }
                   },
                   child: const Text('Sauvegarder'),
@@ -695,6 +712,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   Future<void> _doGeneratePdf(String personName) async {
     final pdf = pw.Document();
     final now = DateTime.now();
+    print('DEBUG: Global Remarks: ${_remarksController.text}');
     final formattedDate = "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
     final displayDate = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
     final fileName = "$personName - $formattedDate.pdf";
@@ -713,7 +731,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         },
         build: (pw.Context context) => [
           pw.SizedBox(height: 20),
-          pw.Table.fromTextArray(
+          if (_remarksController.text.isNotEmpty) ...[
+            pw.Text('Remarques globales: ${_remarksController.text}', style: pw.TextStyle(fontSize: 12, fontStyle: pw.FontStyle.italic)),
+            pw.SizedBox(height: 10),
+          ],
+          pw.TableHelper.fromTextArray(
             headers: ['Jour', 'Exercice', 'Répétitions', 'Séries', 'Pause (s)', 'Tempo', 'Remarques'],
             data: _currentProtocolExercises.map((ex) => [
               ex.days.join(', '),

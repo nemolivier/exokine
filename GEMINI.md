@@ -31,13 +31,13 @@ Ce document décrit l'architecture et la stack technologique proposées pour le 
     - **Écosystème Riche :** Accès à l'immense écosystème de paquets `npm` pour accélérer le développement.
     - **Flexibilité :** S'intègre facilement avec tout type de base de données.
 
-### Base de Données : PostgreSQL
+### Base de Données : SQLite
 
-- **SGBD :** [PostgreSQL](https://www.postgresql.org/)
+- **SGBD :** [SQLite](https://www.sqlite.org/index.html)
 - **Pourquoi ?**
-    - **Fiabilité et Robustesse :** Réputation d'être l'un des SGBD relationnels les plus avancés et fiables.
-    - **Flexibilité :** Supporte les données relationnelles (SQL) et non relationnelles (JSON).
-    - **Open Source :** Pas de coût de licence.
+    - **Simplicité :** Base de données légère, sans serveur, idéale pour le développement et les petites applications.
+    - **Intégration Facile :** S'intègre directement dans l'application, sans configuration complexe.
+    - **Performances :** Très performante pour les opérations locales.
 
 ## 3. Architecture de Sécurité
 

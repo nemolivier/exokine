@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 
 import '../../models/exercise.dart';
-import '../../services/api_service.dart';
 import '../../widgets/empty_state_view.dart';
 
 class ExercicesView extends StatelessWidget {

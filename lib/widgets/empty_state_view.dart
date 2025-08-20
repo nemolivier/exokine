@@ -19,7 +19,7 @@ class EmptyStateView extends StatelessWidget {
           Icon(
             icon,
             size: 80,
-            color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.secondary.withAlpha(128),
           ),
           const SizedBox(height: 16),
           Text(
