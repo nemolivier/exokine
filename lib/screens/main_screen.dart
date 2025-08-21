@@ -569,6 +569,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       const SnackBar(content: Text('Programme mis à jour !')),
                     );
                   } catch (e) {
+                    print('DEBUG: Error updating protocol: $e'); // Added debug print
                     if (mounted) {
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -712,7 +713,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   Future<void> _doGeneratePdf(String personName) async {
     final pdf = pw.Document();
     final now = DateTime.now();
-    print('DEBUG: Global Remarks: ${_remarksController.text}');
     final formattedDate = "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
     final displayDate = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
     final fileName = "$personName - $formattedDate.pdf";
@@ -735,8 +735,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         },
         build: (pw.Context context) => [
           pw.SizedBox(height: 20),
-          pw.Text('TEST: Remarques globales hardcoded', style: pw.TextStyle(fontSize: 12, font: fontItalic)),
-          pw.SizedBox(height: 10),
+          if (_remarksController.text.isNotEmpty) ...[
+            pw.Text('Remarques globales: ${_remarksController.text}', style: pw.TextStyle(fontSize: 12, font: fontItalic)),
+            pw.SizedBox(height: 10),
+          ],
           pw.TableHelper.fromTextArray(
             headers: ['Jour', 'Exercice', 'Répétitions', 'Séries', 'Pause (s)', 'Tempo', 'Remarques'],
             data: _currentProtocolExercises.map((ex) => [

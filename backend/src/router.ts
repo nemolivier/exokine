@@ -99,6 +99,8 @@ router.put('/protocols/:id', async (req, res) => {
       return protocol;
     });
 
+    console.log('DEBUG: Updated Protocol from DB:', updatedProtocol); // Debug log
+
     const responseProtocol = {
       ...updatedProtocol,
       exercises: updatedProtocol.exercises.map(ex => ({

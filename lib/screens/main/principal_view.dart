@@ -99,6 +99,7 @@ class _PrincipalViewState extends State<PrincipalView> {
                                     },
                                   ),
                                 ),
+                                SizedBox(width: 8.0), // Added spacing
                                 Expanded(
                                   flex: 4,
                                   child: FutureBuilder<List<Exercise>>(
