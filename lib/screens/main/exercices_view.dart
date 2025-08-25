@@ -71,7 +71,7 @@ class ExercicesView extends StatelessWidget {
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 8),
-                            _buildExerciseTags(exercise, context, alignment: MainAxisAlignment.center),
+                            _buildExerciseTags(exercise, context, alignment: WrapAlignment.center),
                           ],
                         ),
                       ),
@@ -147,7 +147,7 @@ class ExercicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildExerciseTags(Exercise exercise, BuildContext context, {MainAxisAlignment alignment = MainAxisAlignment.start}) {
+  Widget _buildExerciseTags(Exercise exercise, BuildContext context, {WrapAlignment alignment = WrapAlignment.start}) {
     final List<Widget> tags = [];
 
     if (exercise.type != null && exercise.type!.isNotEmpty) {
