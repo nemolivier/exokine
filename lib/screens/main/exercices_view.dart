@@ -59,17 +59,20 @@ class ExercicesView extends StatelessWidget {
                   onTap: () => onEditExercise(exercise),
                   child: Stack(
                     children: [
-                      Container(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
                               exercise.name,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
-                          ),
+                            const SizedBox(height: 8),
+                            _buildExerciseTags(exercise, context, alignment: MainAxisAlignment.center),
+                          ],
                         ),
                       ),
                       Positioned(
@@ -115,6 +118,7 @@ class ExercicesView extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
               child: ListTile(
                 title: Text(exercise.name),
+                subtitle: _buildExerciseTags(exercise, context),
                 onTap: () => onEditExercise(exercise),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -140,6 +144,48 @@ class ExercicesView extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildExerciseTags(Exercise exercise, BuildContext context, {MainAxisAlignment alignment = MainAxisAlignment.start}) {
+    final List<Widget> tags = [];
+
+    if (exercise.type != null && exercise.type!.isNotEmpty) {
+      tags.add(Chip(
+        label: Text(exercise.type!),
+        backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer),
+        side: BorderSide.none,
+      ));
+    }
+
+    for (final tag in exercise.articulation) {
+      tags.add(Chip(
+        label: Text(tag),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+        side: BorderSide.none,
+      ));
+    }
+
+    for (final tag in exercise.muscles) {
+      tags.add(Chip(
+        label: Text(tag),
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),
+        side: BorderSide.none,
+      ));
+    }
+
+    if (tags.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Wrap(
+      spacing: 4.0,
+      runSpacing: 4.0,
+      alignment: alignment,
+      children: tags,
     );
   }
 }
