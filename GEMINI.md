@@ -65,7 +65,7 @@ autant que possible, utiliser les informations spécifiques aux langages utilis�
         - muscles impliqués
     - **Programme :** Un programme est un ensemble d’exercices il contient :
         - nom
-        - mots clef 
+        - remarques
 
 ### **Inerface principale**
 
