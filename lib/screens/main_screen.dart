@@ -11,6 +11,7 @@ import '../services/api_service.dart';
 import './main/principal_view.dart';
 import './main/programmes_view.dart';
 import './main/exercices_view.dart';
+import '../widgets/autocomplete_form_field.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -35,6 +36,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   bool _isProgrammesGridView = false;
   bool _isExercicesGridView = false;
 
+  List<String> _typeSuggestions = [];
+  List<String> _articulationSuggestions = [];
+  List<String> _muscleSuggestions = [];
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +59,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     });
     _protocolsFuture = _apiService.getProtocols();
     _exercisesFuture = _apiService.getExercises();
+    _fetchSuggestions();
 
     // Add 3 default rows
     _currentProtocolExercises = [
@@ -61,6 +67,27 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
       _createEmptyExercise(),
       _createEmptyExercise(),
     ];
+  }
+
+  Future<void> _fetchSuggestions() async {
+    try {
+      final types = await _apiService.getTypes();
+      final articulations = await _apiService.getArticulations();
+      final muscles = await _apiService.getMuscles();
+      if (mounted) {
+        setState(() {
+          _typeSuggestions = types;
+          _articulationSuggestions = articulations;
+          _muscleSuggestions = muscles;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur lors de la récupération des suggestions: $e")),
+        );
+      }
+    }
   }
 
   void _addEmptyExercise({bool setDirty = true}) {
@@ -350,17 +377,22 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   controller: nameController,
                   decoration: const InputDecoration(hintText: "Nom de l'exercice"),
                 ),
-                TextField(
+                AutocompleteFormField(
                   controller: articulationController,
-                  decoration: const InputDecoration(hintText: "Articulations (séparées par des virgules)"),
+                  suggestions: _articulationSuggestions,
+                  hintText: "Articulations (séparées par des virgules)",
+                  isTagField: true,
                 ),
-                TextField(
+                AutocompleteFormField(
                   controller: musclesController,
-                  decoration: const InputDecoration(hintText: "Muscles (séparées par des virgules)"),
+                  suggestions: _muscleSuggestions,
+                  hintText: "Muscles (séparées par des virgules)",
+                  isTagField: true,
                 ),
-                TextField(
+                AutocompleteFormField(
                   controller: typeController,
-                  decoration: const InputDecoration(hintText: "Type (ex: Équilibre, Renforcement)"),
+                  suggestions: _typeSuggestions,
+                  hintText: "Type (ex: Équilibre, Renforcement)",
                 ),
               ],
             ),
@@ -376,8 +408,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   try {
                     await _apiService.createExercise(
                       nameController.text,
-                      articulationController.text.split(',').map((e) => e.trim()).toList(),
-                      musclesController.text.split(',').map((e) => e.trim()).toList(),
+                      articulationController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                      musclesController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
                       typeController.text,
                     );
                     if (mounted) {
@@ -422,17 +454,22 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   controller: nameController,
                   decoration: const InputDecoration(hintText: "Nom de l'exercice"),
                 ),
-                TextField(
+                AutocompleteFormField(
                   controller: articulationController,
-                  decoration: const InputDecoration(hintText: "Articulations (séparées par des virgules)"),
+                  suggestions: _articulationSuggestions,
+                  hintText: "Articulations (séparées par des virgules)",
+                  isTagField: true,
                 ),
-                TextField(
+                AutocompleteFormField(
                   controller: musclesController,
-                  decoration: const InputDecoration(hintText: "Muscles (séparées par des virgules)"),
+                  suggestions: _muscleSuggestions,
+                  hintText: "Muscles (séparées par des virgules)",
+                  isTagField: true,
                 ),
-                TextField(
+                AutocompleteFormField(
                   controller: typeController,
-                  decoration: const InputDecoration(hintText: "Type (ex: Équilibre, Renforcement)"),
+                  suggestions: _typeSuggestions,
+                  hintText: "Type (ex: Équilibre, Renforcement)",
                 ),
               ],
             ),
@@ -449,8 +486,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     final updatedExercise = Exercise(
                       id: exercise.id,
                       name: nameController.text,
-                      articulation: articulationController.text.split(',').map((e) => e.trim()).toList(),
-                      muscles: musclesController.text.split(',').map((e) => e.trim()).toList(),
+                      articulation: articulationController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                      muscles: musclesController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
                       type: typeController.text,
                     );
                     await _apiService.updateExercise(updatedExercise);

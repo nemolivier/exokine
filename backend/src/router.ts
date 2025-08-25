@@ -201,4 +201,48 @@ router.delete('/exercises/:id', async (req, res) => {
   }
 });
 
+// Routes for tags
+router.get('/tags/types', async (req, res) => {
+  const exercises = await prisma.exercise.findMany({
+    where: {
+      type: {
+        not: null,
+      },
+    },
+    select: {
+      type: true,
+    },
+    distinct: ['type'],
+  });
+  res.json(exercises.map(e => e.type));
+});
+
+router.get('/tags/articulations', async (req, res) => {
+  const exercises = await prisma.exercise.findMany({
+    select: {
+      articulation: true,
+    },
+  });
+  const allArticulations = exercises
+    .flatMap(e => e.articulation?.split(',') ?? [])
+    .map(a => a.trim())
+    .filter(a => a);
+  const uniqueArticulations = [...new Set(allArticulations)];
+  res.json(uniqueArticulations);
+});
+
+router.get('/tags/muscles', async (req, res) => {
+  const exercises = await prisma.exercise.findMany({
+    select: {
+      muscles: true,
+    },
+  });
+  const allMuscles = exercises
+    .flatMap(e => e.muscles?.split(',') ?? [])
+    .map(m => m.trim())
+    .filter(m => m);
+  const uniqueMuscles = [...new Set(allMuscles)];
+  res.json(uniqueMuscles);
+});
+
 export default router;

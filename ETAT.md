@@ -28,6 +28,7 @@ Ce document récapitule l'état actuel du projet Exokin, les fonctionnalités im
     - Affichage de la liste des exercices de base (nom, articulations, muscles).
     - Ajout de nouveaux exercices de base via le bouton `+`, avec champs pour le nom, les articulations et les muscles.
     - Édition des exercices existants via un bouton "Modifier", permettant de changer le nom, les articulations et les muscles.
+    - Autocomplétion pour les champs "Type", "Articulations" et "Muscles" lors de la création/modification d'un exercice pour suggérer les valeurs existantes et standardiser les données.
     - Possibilité de supprimer un exercice de base.
 
 ### Backend (Node.js/Express)

@@ -100,4 +100,34 @@ class ApiService {
       throw Exception('Failed to delete exercise');
     }
   }
+
+  Future<List<String>> getTypes() async {
+    final response = await http.get(Uri.parse('$_baseUrl/tags/types'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((e) => e.toString()).toList();
+    } else {
+      throw Exception('Failed to load types');
+    }
+  }
+
+  Future<List<String>> getArticulations() async {
+    final response = await http.get(Uri.parse('$_baseUrl/tags/articulations'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((e) => e.toString()).toList();
+    } else {
+      throw Exception('Failed to load articulations');
+    }
+  }
+
+  Future<List<String>> getMuscles() async {
+    final response = await http.get(Uri.parse('$_baseUrl/tags/muscles'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((e) => e.toString()).toList();
+    } else {
+      throw Exception('Failed to load muscles');
+    }
+  }
 }
